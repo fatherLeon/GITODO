@@ -10,6 +10,10 @@ import FSCalendar
 import Lottie
 
 final class TodoViewController: UIViewController {
+    
+    private let today = Date()
+    private var currentPage: Date?
+    
     private let calendarHeaderStackView: UIStackView = {
         let headerStack = UIStackView()
         
@@ -66,16 +70,31 @@ final class TodoViewController: UIViewController {
         
         configureUI()
         
-        leftArrowButton.addTarget(self, action: #selector(didTapLeftArrowBtn(_:)), for: .touchUpInside)
-        rightArrowButton.addTarget(self, action: #selector(didTapRightArrowBtn), for: .touchUpInside)
+        leftArrowButton.addTarget(self, action: #selector(movePrevWeek), for: .touchUpInside)
+        rightArrowButton.addTarget(self, action: #selector(moveNextWeek), for: .touchUpInside)
     }
     
-    @objc func didTapLeftArrowBtn(_ sender: Any) {
-        print("Left")
+    @objc func moveNextWeek() {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        
+        dateComponents.weekOfMonth = 1
+        currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        
+        guard let page = currentPage else { return }
+        
+        calendarView.setCurrentPage(page, animated: true)
     }
     
-    @objc func didTapRightArrowBtn() {
-        print("Right")
+    @objc func movePrevWeek() {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        
+        dateComponents.weekOfMonth = -1
+        currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        
+        guard let page = currentPage else { return }
+        calendarView.setCurrentPage(page, animated: true)
     }
 }
 
@@ -86,7 +105,7 @@ extension TodoViewController {
         
         configureNavigationHeaderView()
         configureCalendarHeaderView()
-        configureCalendar()
+        configureCalendarView()
     }
     
     private func configureNavigationHeaderView() {
@@ -118,7 +137,7 @@ extension TodoViewController {
         ])
     }
     
-    private func configureCalendar() {
+    private func configureCalendarView() {
         calendarView.delegate = self
         calendarView.dataSource = self
         
@@ -135,5 +154,7 @@ extension TodoViewController {
 
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource {
-    
+    func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
+        calendarHeaderLabel.text = Date.toString(calendar.currentPage)
+    }
 }
