@@ -157,4 +157,14 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource {
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
     }
+    
+    func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
+        if today < date {
+            return nil
+        }
+        
+        let image = UIImage(named: "GithubIcon")?.resized(to: CGSize(width: 20, height: 20))
+        
+        return image?.withTintColor(.black)
+    }
 }
