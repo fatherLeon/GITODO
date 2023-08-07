@@ -42,11 +42,40 @@ final class TodoViewController: UIViewController {
         
         return calendar
     }()
+    private let leftArrowButton: AnimatedButton = {
+        let btn = AnimatedButton()
+        
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.animationSpeed = 5
+        btn.transform = CGAffineTransform(rotationAngle: .pi / 2)
+        
+        return btn
+    }()
+    private let rightArrowButton: AnimatedButton = {
+        let btn = AnimatedButton()
+        
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.animationSpeed = 5
+        btn.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+        
+        return btn
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         configureUI()
+        
+        leftArrowButton.addTarget(self, action: #selector(didTapLeftArrowBtn(_:)), for: .touchUpInside)
+        rightArrowButton.addTarget(self, action: #selector(didTapRightArrowBtn), for: .touchUpInside)
+    }
+    
+    @objc func didTapLeftArrowBtn(_ sender: Any) {
+        print("Left")
+    }
+    
+    @objc func didTapRightArrowBtn() {
+        print("Right")
     }
 }
 
@@ -65,17 +94,14 @@ extension TodoViewController {
     }
     
     private func configureCalendarHeaderView() {
-        let leftArrowButton = LottieButton("arrow", loopMode: .playOnce, animationSpeed: 0.3, transformAngle: .pi / 2)
-        
-        leftArrowButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        let rightArrowButton = LottieButton("arrow", loopMode: .playOnce, animationSpeed: 0.3, transformAngle: -(.pi / 2))
-        
-        rightArrowButton.translatesAutoresizingMaskIntoConstraints = false
+        guard let animation = LottieAnimationView(asset: "arrow").animation else { return }
         
         calendarHeaderStackView.addArrangedSubview(calendarHeaderLabel)
         calendarHeaderStackView.addArrangedSubview(leftArrowButton)
         calendarHeaderStackView.addArrangedSubview(rightArrowButton)
+        
+        leftArrowButton.animation = animation
+        rightArrowButton.animation = animation
         
         view.addSubview(calendarHeaderStackView)
         
