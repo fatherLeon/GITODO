@@ -34,6 +34,13 @@ final class TodoViewController: UIViewController {
         
         return label
     }()
+    private let tableView: UITableView = {
+        let tableView = UITableView(frame: .zero, style: .plain)
+        
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return tableView
+    }()
     private let calendarView: FSCalendar = {
         let calendar = FSCalendar(frame: .zero)
         
@@ -66,12 +73,14 @@ final class TodoViewController: UIViewController {
         
         return btn
     }()
-    private let tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+    private let addAnimationView: LottieAnimationView = {
+        let view = LottieAnimationView(name: "add")
         
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.animationSpeed = 3.0
+        view.loopMode = .playOnce
+        view.backgroundBehavior = .pauseAndRestore
         
-        return tableView
+        return view
     }()
 
     override func viewDidLoad() {
@@ -105,6 +114,10 @@ final class TodoViewController: UIViewController {
         guard let page = currentPage else { return }
         calendarView.setCurrentPage(page, animated: true)
     }
+    
+    @objc func clickedAddButton() {
+        addAnimationView.play()
+    }
 }
 
 // MARK: UI
@@ -120,14 +133,22 @@ extension TodoViewController {
     
     private func configureNavigationHeaderView() {
         self.navigationItem.title = "GITODO"
+        self.addAnimationView.frame.size = CGSize(width: 30, height: 30)
+        self.addAnimationView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(clickedAddButton)))
+        let barbutton = UIBarButtonItem(customView: addAnimationView)
+        
+        barbutton.target = self
+        barbutton.action = #selector(clickedAddButton)
+        
+        self.navigationItem.rightBarButtonItem = barbutton
     }
     
     private func configureCalendarHeaderView() {
-        guard let animation = LottieAnimationView(asset: "arrow").animation else { return }
-        
         calendarHeaderStackView.addArrangedSubview(calendarHeaderLabel)
         calendarHeaderStackView.addArrangedSubview(leftArrowButton)
         calendarHeaderStackView.addArrangedSubview(rightArrowButton)
+        
+        guard let animation = LottieAnimationView(asset: "arrow").animation else { return }
         
         leftArrowButton.animation = animation
         rightArrowButton.animation = animation
@@ -193,6 +214,14 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
+        
+        if currentPage ?? Date() >= calendar.currentPage {
+            movePrevWeek()
+            leftArrowButton.animationView.play()
+        } else {
+            moveNextWeek()
+            rightArrowButton.animationView.play()
+        }
     }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
