@@ -20,7 +20,7 @@ final class TodoViewController: UIViewController {
         
         headerStack.axis = .horizontal
         headerStack.distribution = .fill
-        headerStack.alignment = .center
+        headerStack.alignment = .fill
         headerStack.translatesAutoresizingMaskIntoConstraints = false
         
         return headerStack
@@ -73,6 +73,14 @@ final class TodoViewController: UIViewController {
         
         return btn
     }()
+    private let calendarButton: AnimatedButton = {
+        let btn = AnimatedButton()
+        
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.animationSpeed = 5
+        
+        return btn
+    }()
     private let addAnimationView: LottieAnimationView = {
         let view = LottieAnimationView(name: "add")
         
@@ -90,6 +98,7 @@ final class TodoViewController: UIViewController {
         
         leftArrowButton.addTarget(self, action: #selector(movePrevWeek), for: .touchUpInside)
         rightArrowButton.addTarget(self, action: #selector(moveNextWeek), for: .touchUpInside)
+        calendarButton.addTarget(self, action: #selector(moveTodayWeek), for: .touchUpInside)
     }
     
     @objc func moveNextWeek() {
@@ -113,6 +122,10 @@ final class TodoViewController: UIViewController {
         
         guard let page = currentPage else { return }
         calendarView.setCurrentPage(page, animated: true)
+    }
+    
+    @objc func moveTodayWeek() {
+        calendarView.setCurrentPage(today, animated: true)
     }
     
     @objc func clickedAddButton() {
@@ -145,13 +158,16 @@ extension TodoViewController {
     
     private func configureCalendarHeaderView() {
         calendarHeaderStackView.addArrangedSubview(calendarHeaderLabel)
+        calendarHeaderStackView.addArrangedSubview(calendarButton)
         calendarHeaderStackView.addArrangedSubview(leftArrowButton)
         calendarHeaderStackView.addArrangedSubview(rightArrowButton)
         
-        guard let animation = LottieAnimationView(asset: "arrow").animation else { return }
+        guard let arrowAnimation = LottieAnimation.named("arrow"),
+              let calendarAnimation = LottieAnimation.named("calendar") else { return }
         
-        leftArrowButton.animation = animation
-        rightArrowButton.animation = animation
+        leftArrowButton.animation = arrowAnimation
+        rightArrowButton.animation = arrowAnimation
+        calendarButton.animation = calendarAnimation
         
         view.addSubview(calendarHeaderStackView)
         
@@ -160,6 +176,8 @@ extension TodoViewController {
             leftArrowButton.heightAnchor.constraint(equalTo: leftArrowButton.heightAnchor),
             rightArrowButton.widthAnchor.constraint(equalTo: calendarHeaderStackView.widthAnchor, multiplier: 0.1),
             rightArrowButton.heightAnchor.constraint(equalTo: rightArrowButton.heightAnchor),
+            calendarButton.widthAnchor.constraint(equalTo: calendarHeaderStackView.widthAnchor, multiplier: 0.2),
+            calendarButton.heightAnchor.constraint(equalTo: calendarButton.heightAnchor),
             
             calendarHeaderStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             calendarHeaderStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
@@ -216,12 +234,11 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
         
         if currentPage ?? Date() >= calendar.currentPage {
-            movePrevWeek()
             leftArrowButton.animationView.play()
         } else {
-            moveNextWeek()
             rightArrowButton.animationView.play()
         }
+        currentPage = calendar.currentPage
     }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
@@ -236,6 +253,11 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
         return [.red]
     }
     
+    func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
+//        return UIImage(named: "GithubIcon")?.resized(to: CGSize(width: 10, height: 40))
+        return nil
+        
+    }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         calendarHeightAnchor?.constant = bounds.height
