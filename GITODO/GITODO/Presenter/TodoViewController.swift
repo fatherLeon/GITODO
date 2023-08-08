@@ -13,6 +13,7 @@ final class TodoViewController: UIViewController {
     
     private let today = Date()
     private var currentPage: Date?
+    private var calendarHeightAnchor: NSLayoutConstraint?
     
     private let calendarHeaderStackView: UIStackView = {
         let headerStack = UIStackView()
@@ -38,6 +39,7 @@ final class TodoViewController: UIViewController {
         
         calendar.headerHeight = 0
         calendar.scope = .week
+        calendar.scrollDirection = .vertical
         calendar.locale = Locale.current
         calendar.appearance.selectionColor = .red
         calendar.appearance.todayColor = .blue
@@ -63,6 +65,13 @@ final class TodoViewController: UIViewController {
         btn.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
         
         return btn
+    }()
+    private let tableView: UITableView = {
+        let tableView = UITableView(frame: .zero, style: .plain)
+        
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return tableView
     }()
 
     override func viewDidLoad() {
@@ -106,6 +115,7 @@ extension TodoViewController {
         configureNavigationHeaderView()
         configureCalendarHeaderView()
         configureCalendarView()
+        configureTableView()
     }
     
     private func configureNavigationHeaderView() {
@@ -146,25 +156,59 @@ extension TodoViewController {
         NSLayoutConstraint.activate([
             calendarView.topAnchor.constraint(equalTo: calendarHeaderStackView.bottomAnchor),
             calendarView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            calendarView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            calendarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            calendarView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        ])
+        
+        calendarHeightAnchor = calendarView.heightAnchor.constraint(equalToConstant: view.frame.height / 3)
+        calendarHeightAnchor?.isActive = true
+    }
+    
+    private func configureTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        
+        view.addSubview(tableView)
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: calendarView.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 }
 
+// MARK: TableView delegate datasource
+extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 10
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        return UITableViewCell()
+    }
+}
+
 // MARK: FSCalendar delegate datasource
-extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource {
+extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
     }
     
-    func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
-        if today < date {
-            return nil
-        }
-        
-        let image = UIImage(named: "GithubIcon")?.resized(to: CGSize(width: 20, height: 20))
-        
-        return image?.withTintColor(.black)
+    func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
+        return 1
+    }
+    
+    func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
+        return [.red]
+    }
+    
+    func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
+        return [.red]
+    }
+    
+    
+    func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
+        calendarHeightAnchor?.constant = bounds.height
     }
 }
