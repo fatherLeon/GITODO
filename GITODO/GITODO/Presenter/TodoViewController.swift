@@ -14,6 +14,7 @@ final class TodoViewController: UIViewController {
     private let today = Date()
     private var currentPage: Date?
     private var calendarHeightAnchor: NSLayoutConstraint?
+    private var scopeMode: FSCalendarScope = .week
     
     private let calendarHeaderStackView: UIStackView = {
         let headerStack = UIStackView()
@@ -96,36 +97,51 @@ final class TodoViewController: UIViewController {
         
         configureUI()
         
-        leftArrowButton.addTarget(self, action: #selector(movePrevWeek), for: .touchUpInside)
-        rightArrowButton.addTarget(self, action: #selector(moveNextWeek), for: .touchUpInside)
+        leftArrowButton.addTarget(self, action: #selector(clickedLeftArrowBtn), for: .touchUpInside)
+        rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
         calendarButton.addTarget(self, action: #selector(moveTodayWeek), for: .touchUpInside)
     }
     
-    @objc func moveNextWeek() {
+    @objc func clickedRightArrowBtn() {
         let calendar = Calendar.current
         var dateComponents = DateComponents()
         
-        dateComponents.weekOfMonth = 1
-        currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        if scopeMode == .week {
+            dateComponents.weekOfMonth = 1
+            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        } else {
+            dateComponents.month = 1
+            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        }
         
         guard let page = currentPage else { return }
-        
         calendarView.setCurrentPage(page, animated: true)
     }
     
-    @objc func movePrevWeek() {
+    @objc func clickedLeftArrowBtn() {
         let calendar = Calendar.current
         var dateComponents = DateComponents()
         
-        dateComponents.weekOfMonth = -1
-        currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        if scopeMode == .week {
+            dateComponents.weekOfMonth = -1
+            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        } else {
+            dateComponents.month = -1
+            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+        }
         
         guard let page = currentPage else { return }
         calendarView.setCurrentPage(page, animated: true)
     }
     
     @objc func moveTodayWeek() {
-        calendarView.setCurrentPage(today, animated: true)
+        if scopeMode == .month {
+            calendarView.scope = .week
+            scopeMode = .week
+        } else {
+            calendarView.scope = .month
+            scopeMode = .month
+        }
     }
     
     @objc func clickedAddButton() {
@@ -189,7 +205,6 @@ extension TodoViewController {
     private func configureCalendarView() {
         calendarView.delegate = self
         calendarView.dataSource = self
-        calendarView.register(CustomCalendarCell.self, forCellReuseIdentifier: CustomCalendarCell.identifier)
         
         view.addSubview(calendarView)
         
@@ -231,10 +246,6 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
-    func calendar(_ calendar: FSCalendar, cellFor date: Date, at position: FSCalendarMonthPosition) -> FSCalendarCell {
-        return calendar.dequeueReusableCell(withIdentifier: CustomCalendarCell.identifier, for: date, at: .current)
-    }
-    
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
         
