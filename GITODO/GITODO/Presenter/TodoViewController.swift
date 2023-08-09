@@ -138,9 +138,19 @@ final class TodoViewController: UIViewController {
         if scopeMode == .month {
             calendarView.scope = .week
             scopeMode = .week
+            
+            UIView.animate(withDuration: 0.5) {
+                self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
+                self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+            }
         } else {
             calendarView.scope = .month
             scopeMode = .month
+            
+            UIView.animate(withDuration: 0.5) {
+                self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
+                self.rightArrowButton.transform = CGAffineTransform(rotationAngle: 0)
+            }
         }
     }
     
@@ -248,12 +258,6 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
-        
-        if currentPage ?? Date() >= calendar.currentPage {
-            leftArrowButton.animationView.play()
-        } else {
-            rightArrowButton.animationView.play()
-        }
         currentPage = calendar.currentPage
     }
     
