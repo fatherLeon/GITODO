@@ -139,10 +139,8 @@ final class TodoViewController: UIViewController {
             calendarView.scope = .week
             scopeMode = .week
             
-            UIView.animate(withDuration: 0.5) {
-                self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
-                self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
-            }
+            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
+            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
         } else {
             calendarView.scope = .month
             scopeMode = .month
@@ -266,14 +264,18 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-        return [.red]
+        return [CustomColor.darkGreen]
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
-        return [.red]
+        return [CustomColor.darkGray]
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         calendarHeightAnchor?.constant = bounds.height
+    }
+    
+    func calendar(_ calendar: FSCalendar, willDisplay cell: FSCalendarCell, for date: Date, at monthPosition: FSCalendarMonthPosition) {
+        cell.eventIndicator.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
     }
 }
