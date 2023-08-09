@@ -77,14 +77,14 @@ final class TodoViewController: UIViewController {
         let btn = AnimatedButton()
         
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.animationSpeed = 5
+        btn.animationSpeed = 3.0
         
         return btn
     }()
     private let addAnimationView: LottieAnimationView = {
         let view = LottieAnimationView(name: "add")
         
-        view.animationSpeed = 3.0
+        view.animationSpeed = 2.0
         view.loopMode = .playOnce
         view.backgroundBehavior = .pauseAndRestore
         
@@ -189,6 +189,7 @@ extension TodoViewController {
     private func configureCalendarView() {
         calendarView.delegate = self
         calendarView.dataSource = self
+        calendarView.register(CustomCalendarCell.self, forCellReuseIdentifier: CustomCalendarCell.identifier)
         
         view.addSubview(calendarView)
         
@@ -230,6 +231,10 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
+    func calendar(_ calendar: FSCalendar, cellFor date: Date, at position: FSCalendarMonthPosition) -> FSCalendarCell {
+        return calendar.dequeueReusableCell(withIdentifier: CustomCalendarCell.identifier, for: date, at: .current)
+    }
+    
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
         
@@ -251,12 +256,6 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
         return [.red]
-    }
-    
-    func calendar(_ calendar: FSCalendar, imageFor date: Date) -> UIImage? {
-//        return UIImage(named: "GithubIcon")?.resized(to: CGSize(width: 10, height: 40))
-        return nil
-        
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
