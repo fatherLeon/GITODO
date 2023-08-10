@@ -154,6 +154,8 @@ final class TodoViewController: UIViewController {
     
     @objc func clickedAddButton() {
         addAnimationView.play()
+        
+        self.present(AddingTodoViewController(), animated: true)
     }
 }
 
