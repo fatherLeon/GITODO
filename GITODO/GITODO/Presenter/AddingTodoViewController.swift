@@ -14,7 +14,7 @@ class AddingTodoViewController: UIViewController {
         
         view.translatesAutoresizingMaskIntoConstraints = false
         view.placeholder = "할 일을 입력해주세요"
-        view.font = .preferredFont(forTextStyle: .headline)
+        view.font = .boldSystemFont(ofSize: 17)
         
         return view
     }()
@@ -43,7 +43,6 @@ class AddingTodoViewController: UIViewController {
         button.setTitle("SAVE", for: .normal)
         button.backgroundColor = .systemBlue
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 5
         
         return button
     }()
@@ -54,7 +53,6 @@ class AddingTodoViewController: UIViewController {
         button.setTitle("CANCEL", for: .normal)
         button.backgroundColor = .systemRed
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 5
         
         return button
     }()
@@ -64,7 +62,6 @@ class AddingTodoViewController: UIViewController {
         hStack.translatesAutoresizingMaskIntoConstraints = false
         hStack.axis = .horizontal
         hStack.distribution = .fillEqually
-        hStack.spacing = self.view.frame.width / 10
         
         return hStack
     }()
@@ -112,8 +109,14 @@ extension AddingTodoViewController {
     private func configureContentTextView() {
         self.view.addSubview(contentTextView)
         
+        contentTextView.textColor = .secondaryLabel
+        contentTextView.layer.borderColor = UIColor.gray.cgColor
+        contentTextView.layer.borderWidth = 0.25
+        contentTextView.layer.cornerRadius = 10
+        contentTextView.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        
         NSLayoutConstraint.activate([
-            contentTextView.topAnchor.constraint(equalTo: headTextField.bottomAnchor, constant: 5),
+            contentTextView.topAnchor.constraint(equalTo: headTextField.bottomAnchor, constant: 20),
             contentTextView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             contentTextView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
         ])
@@ -123,7 +126,7 @@ extension AddingTodoViewController {
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([
-            datePicker.topAnchor.constraint(equalTo: contentTextView.bottomAnchor, constant: 10),
+            datePicker.topAnchor.constraint(equalTo: contentTextView.bottomAnchor),
             datePicker.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
             datePicker.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
             datePicker.bottomAnchor.constraint(equalTo: buttonsStack.topAnchor)
@@ -132,6 +135,11 @@ extension AddingTodoViewController {
     
     private func configureSaveAndCancelButton() {
         self.view.addSubview(buttonsStack)
+        
+        buttonsStack.spacing = self.view.frame.width / 20
+        
+        saveButton.layer.cornerRadius = 10
+        cancelButton.layer.cornerRadius = 10
         
         NSLayoutConstraint.activate([
             buttonsStack.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
