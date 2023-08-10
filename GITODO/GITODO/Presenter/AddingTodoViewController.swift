@@ -71,6 +71,14 @@ class AddingTodoViewController: UIViewController {
         
         configureUI()
     }
+    
+    @objc private func clickedSaveButton() {
+        dismiss(animated: true)
+    }
+    
+    @objc private func clickedCancelButton() {
+        dismiss(animated: true)
+    }
 }
 
 // MARK: UI
@@ -135,6 +143,9 @@ extension AddingTodoViewController {
     
     private func configureSaveAndCancelButton() {
         self.view.addSubview(buttonsStack)
+        
+        saveButton.addTarget(self, action: #selector(clickedSaveButton), for: .touchUpInside)
+        cancelButton.addTarget(self, action: #selector(clickedCancelButton), for: .touchUpInside)
         
         buttonsStack.spacing = self.view.frame.width / 20
         
