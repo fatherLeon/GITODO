@@ -10,4 +10,5 @@ import Foundation
 enum DBError: Error {
     case creationError
     case saveError
+    case fetchError
 }

@@ -5,8 +5,11 @@
 //  Created by 강민수 on 2023/08/11.
 //
 
+import CoreData
+
 protocol Interactionable {
     var entityName: String { get }
+    
     func getProperties() -> [String: Any]
 }
 

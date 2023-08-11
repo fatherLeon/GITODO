@@ -5,6 +5,7 @@
 //  Created by 강민수 on 2023/08/11.
 //
 
+import CoreData
 import Foundation
 
 struct TaskObject: Interactionable {
