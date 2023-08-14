@@ -9,8 +9,6 @@ import UIKit
 
 class AddingTodoViewController: UIViewController {
     
-    private var pickedDate = Date()
-    
     private let headTextField: UITextField = {
         let view = UITextField()
         
@@ -76,6 +74,14 @@ class AddingTodoViewController: UIViewController {
     }
     
     @objc private func clickedSaveButton() {
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: datePicker.date)
+        
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day,
+              let hour = components.hour,
+              let minute = components.minute else { return }
+        
         dismiss(animated: true)
     }
     
@@ -84,11 +90,22 @@ class AddingTodoViewController: UIViewController {
     }
     
     @objc private func datePickerValueChanged(_ datePicker: UIDatePicker) {
-        let components = Calendar.current.dateComponents([.month, .day, .hour, .minute], from: datePicker.date)
-        
-        print("\(components.month)-\(components.minute) \(components.hour):\(components.minute)")
-        
-        pickedDate = datePicker.date
+//        let components = Calendar.current.dateComponents([.month, .day, .hour, .minute], from: datePicker.date)
+//
+//        guard let year = components.year,
+//              let month = components.month,
+//              let day = components.day,
+//              let hour = components.hour,
+//              let minute = components.minute else { return }
+//
+//        do {
+//            try coredataManager.saveTodo(year: year, month: month, day: day, hour: hour, mintue: minute, title: headTextField.text!, memo: contentTextView.text)
+//            print("O")
+//        } catch {
+//            print("X")
+//            try? coredataManager.saveTask(year: year, month: month, day: day)
+//            try? coredataManager.saveTodo(year: year, month: month, day: day, hour: hour, mintue: minute, title: headTextField.text!, memo: contentTextView.text)
+//        }
     }
 }
 

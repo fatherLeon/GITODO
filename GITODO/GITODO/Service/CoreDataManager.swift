@@ -37,7 +37,7 @@ final class CoreDataManager {
     
     private init() { }
     
-    lazy var persistentContainer: NSPersistentContainer = {
+    private static let persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Task")
         
         container.loadPersistentStores { desc, error in
@@ -50,23 +50,56 @@ final class CoreDataManager {
     }()
     
     private var context: NSManagedObjectContext {
-        return persistentContainer.viewContext
+        return CoreDataManager.persistentContainer.viewContext
     }
     
-    func save(_ interaction: Interactionable) throws {
-        guard let entity = NSEntityDescription.entity(forEntityName: interaction.entityName, in: context) else {
+    func saveTodo(year: Int, month: Int, day: Int, hour: Int, minute: Int, title: String, memo: String) throws {
+        guard let entity = NSEntityDescription.entity(forEntityName: "Todo", in: context),
+              let todo = NSManagedObject(entity: entity, insertInto: context) as? Todo else {
+            throw DBError.creationError
+        }
+        
+        let predicate = NSPredicate(format: "id == %@", "\(year)-\(month)-\(day)")
+        let request = Task.fetchRequest()
+        
+        request.predicate = predicate
+        
+        guard let result = try context.fetch(request).first else {
+            throw DBError.fetchError
+        }
+        
+        todo.setValue(hour, forKey: "hour")
+        todo.setValue(minute, forKey: "minute")
+        todo.setValue(title, forKey: "title")
+        todo.setValue(memo, forKey: "memo")
+        
+        result.addToTodos(todo)
+        
+        do {
+            try context.save()
+        } catch {
+            print("TodoError - \(error)")
+            throw DBError.creationError
+        }
+    }
+    
+    func saveTask(year: Int, month: Int, day: Int, isCommit: Bool = false) throws {
+        guard let entity = NSEntityDescription.entity(forEntityName: "Task", in: context) else {
             throw DBError.creationError
         }
         
         let object = NSManagedObject(entity: entity, insertInto: context)
         
-        for (label, value) in interaction.getProperties() {
-            object.setValue(value, forKey: label)
-        }
+        object.setValue(year, forKey: "year")
+        object.setValue(month, forKey: "month")
+        object.setValue(day, forKey: "day")
+        object.setValue(isCommit, forKey: "isCommit")
+        object.setValue("\(year)-\(month)-\(day)", forKey: "id")
         
         do {
             try context.save()
         } catch {
+            print("TaskError - \(error)")
             throw DBError.saveError
         }
     }
