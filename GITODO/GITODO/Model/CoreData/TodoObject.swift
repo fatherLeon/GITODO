@@ -2,17 +2,16 @@
 //  TodoObject.swift
 //  GITODO
 //
-//  Created by 강민수 on 2023/08/11.
+//  Created by 강민수 on 2023/08/14.
 //
 
-import CoreData
 import Foundation
 
 struct TodoObject: Interactionable {
-    let entityName: String = "Todo"
+    var entityName: String = "Todo"
     
-    let commitNum: Int
-    let date: Date
-    
-    var tasks: [TaskObject] = []
+    let hour: Int
+    let minute: Int
+    let title: String
+    let memo: String
 }

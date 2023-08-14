@@ -2,16 +2,20 @@
 //  TaskObject.swift
 //  GITODO
 //
-//  Created by 강민수 on 2023/08/11.
+//  Created by 강민수 on 2023/08/14.
 //
 
-import CoreData
 import Foundation
 
 struct TaskObject: Interactionable {
-    let entityName: String = "Task"
+    var entityName: String = "Task"
     
-    let date: Date
-    let memo: String
-    let title: String
+    let year: Int
+    let month: Int
+    let day: Int
+    let isCommit: Bool
+    
+    var id: String {
+        return "\(year)-\(month)-\(day)"
+    }
 }

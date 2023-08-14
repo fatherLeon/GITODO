@@ -8,7 +8,9 @@
 import UIKit
 
 class AddingTodoViewController: UIViewController {
-
+    
+    private var pickedDate = Date()
+    
     private let headTextField: UITextField = {
         let view = UITextField()
         
@@ -32,7 +34,8 @@ class AddingTodoViewController: UIViewController {
         
         picker.translatesAutoresizingMaskIntoConstraints = false
         picker.preferredDatePickerStyle = .wheels
-        picker.datePickerMode = .time
+        picker.locale = Locale(identifier: "ko_KR")
+        picker.datePickerMode = .dateAndTime
         
         return picker
     }()
@@ -79,7 +82,16 @@ class AddingTodoViewController: UIViewController {
     @objc private func clickedCancelButton() {
         dismiss(animated: true)
     }
+    
+    @objc private func datePickerValueChanged(_ datePicker: UIDatePicker) {
+        let components = Calendar.current.dateComponents([.month, .day, .hour, .minute], from: datePicker.date)
+        
+        print("\(components.month)-\(components.minute) \(components.hour):\(components.minute)")
+        
+        pickedDate = datePicker.date
+    }
 }
+
 
 // MARK: UI
 extension AddingTodoViewController {
@@ -131,6 +143,8 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+        
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([
