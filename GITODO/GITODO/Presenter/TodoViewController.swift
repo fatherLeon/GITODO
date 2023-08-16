@@ -31,7 +31,7 @@ final class TodoViewController: UIViewController {
         
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .preferredFont(forTextStyle: .headline)
-        label.text = "2023-08"
+        label.text = Date.toString(Date())
         
         return label
     }()
@@ -139,8 +139,10 @@ final class TodoViewController: UIViewController {
             calendarView.scope = .week
             scopeMode = .week
             
-            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
-            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+            UIView.animate(withDuration: 0.5) {
+                self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
+                self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+            }
         } else {
             calendarView.scope = .month
             scopeMode = .month
@@ -275,6 +277,10 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         calendarHeightAnchor?.constant = bounds.height
+        
+        UIView.animate(withDuration: 0.5) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     func calendar(_ calendar: FSCalendar, willDisplay cell: FSCalendarCell, for date: Date, at monthPosition: FSCalendarMonthPosition) {
