@@ -102,6 +102,30 @@ final class TodoViewController: UIViewController {
         leftArrowButton.addTarget(self, action: #selector(clickedLeftArrowBtn), for: .touchUpInside)
         rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
         calendarButton.addTarget(self, action: #selector(moveTodayWeek), for: .touchUpInside)
+        
+        changedTargetDate(today)
+    }
+    
+    private func changedTargetDate(_ date: Date) {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else { return }
+        
+        let targetId = "\(year)-\(month)-\(day)"
+        
+        do {
+            guard let todos = try coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
+                self.todos = []
+                return
+            }
+            
+            self.todos = todos
+            self.tableView.reloadData()
+        } catch {
+            print("Error - Search Error")
+        }
     }
     
     @objc func clickedRightArrowBtn() {
@@ -268,25 +292,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day else { return }
-        
-        let targetId = "\(year)-\(month)-\(day)"
-        
-        do {
-            guard let todos = try coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
-                self.todos = []
-                return
-            }
-            
-            self.todos = todos
-            self.tableView.reloadData()
-        } catch {
-            print("Error - Search Error")
-        }
+        changedTargetDate(date)
     }
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
