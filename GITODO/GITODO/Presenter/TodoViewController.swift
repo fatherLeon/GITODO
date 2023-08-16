@@ -188,6 +188,38 @@ final class TodoViewController: UIViewController {
     }
 }
 
+// MARK: TableView delegate datasource
+extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return todos.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell else {
+            return UITableViewCell()
+        }
+        
+        cell.updateTitle(todos[indexPath.row].title)
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let todo = todos[indexPath.row]
+        var components = DateComponents()
+        
+        components.year = Int(todo.year)
+        components.month = Int(todo.month)
+        components.day = Int(todo.day)
+        components.hour = Int(todo.hour)
+        components.minute = Int(todo.minute)
+
+        let targetedDate = components.date ?? Date()
+        
+        self.present(AddingTodoViewController(targetedDate: targetedDate, titleText: todo.title, memoText: todo.memo), animated: true)
+    }
+}
+
 // MARK: UI
 extension TodoViewController {
     private func configureUI() {
@@ -271,23 +303,6 @@ extension TodoViewController {
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-    }
-}
-
-// MARK: TableView delegate datasource
-extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todos.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell else {
-            return UITableViewCell()
-        }
-        
-        cell.updateTitle(todos[indexPath.row].title)
-        
-        return cell
     }
 }
 
