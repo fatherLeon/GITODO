@@ -9,6 +9,8 @@ import UIKit
 
 class AddingTodoViewController: UIViewController {
     
+    private let coredataManager = CoreDataManager.shared
+    
     private let headTextField: UITextField = {
         let view = UITextField()
         
@@ -75,40 +77,22 @@ class AddingTodoViewController: UIViewController {
     
     @objc private func clickedSaveButton() {
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: datePicker.date)
-        
         guard let year = components.year,
               let month = components.month,
               let day = components.day,
               let hour = components.hour,
               let minute = components.minute else { return }
         
+        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), title: headTextField.text!, memo: contentTextView.text)
+        
+        try? coredataManager.save(todo)
         dismiss(animated: true)
     }
     
     @objc private func clickedCancelButton() {
         dismiss(animated: true)
     }
-    
-    @objc private func datePickerValueChanged(_ datePicker: UIDatePicker) {
-//        let components = Calendar.current.dateComponents([.month, .day, .hour, .minute], from: datePicker.date)
-//
-//        guard let year = components.year,
-//              let month = components.month,
-//              let day = components.day,
-//              let hour = components.hour,
-//              let minute = components.minute else { return }
-//
-//        do {
-//            try coredataManager.saveTodo(year: year, month: month, day: day, hour: hour, mintue: minute, title: headTextField.text!, memo: contentTextView.text)
-//            print("O")
-//        } catch {
-//            print("X")
-//            try? coredataManager.saveTask(year: year, month: month, day: day)
-//            try? coredataManager.saveTodo(year: year, month: month, day: day, hour: hour, mintue: minute, title: headTextField.text!, memo: contentTextView.text)
-//        }
-    }
 }
-
 
 // MARK: UI
 extension AddingTodoViewController {
@@ -160,8 +144,6 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
-        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
-        
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([
