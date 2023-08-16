@@ -13,6 +13,8 @@ final class TodoViewController: UIViewController {
     
     private let today = Date()
     private var currentPage: Date?
+    private var todos: [TodoObject] = []
+    private let coredataManager = CoreDataManager.shared
     private var calendarHeightAnchor: NSLayoutConstraint?
     private var scopeMode: FSCalendarScope = .week
     
@@ -233,6 +235,7 @@ extension TodoViewController {
     private func configureTableView() {
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.register(TodoCell.self, forCellReuseIdentifier: TodoCell.identifier)
         
         view.addSubview(tableView)
         
@@ -248,16 +251,44 @@ extension TodoViewController {
 // MARK: TableView delegate datasource
 extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return todos.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell else {
+            return UITableViewCell()
+        }
+        
+        cell.updateTitle(todos[indexPath.row].title)
+        
+        return cell
     }
 }
 
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
+    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else { return }
+        
+        let targetId = "\(year)-\(month)-\(day)"
+        
+        do {
+            guard let todos = try coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
+                self.todos = []
+                return
+            }
+            
+            self.todos = todos
+            self.tableView.reloadData()
+        } catch {
+            print("Error - Search Error")
+        }
+    }
+    
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
         currentPage = calendar.currentPage

@@ -68,7 +68,7 @@ final class CoreDataManager {
     private init() { }
     
     private static let persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Task")
+        let container = NSPersistentContainer(name: "Todo")
         
         container.loadPersistentStores { desc, error in
             if let error = error as NSError? {
@@ -100,7 +100,12 @@ final class CoreDataManager {
     }
     
     func fetch(_ type: Interactionable.Type) throws -> [Interactionable] {
-        guard let fetchedData = try context.fetch(type.entityType.fetchRequest()) as? [NSManagedObject] else {
+        let request = type.entityType.fetchRequest()
+        let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
+        
+        request.entity = entity
+        
+        guard let fetchedData = try context.fetch(request) as? [NSManagedObject] else {
             throw DBError.fetchError
         }
         
@@ -111,6 +116,9 @@ final class CoreDataManager {
     
     func search(_ id: String, type: Interactionable.Type) throws -> [Interactionable] {
         let request = type.entityType.fetchRequest()
+        let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
+        
+        request.entity = entity
         request.predicate = NSPredicate(format: "id.length > 0 AND id == %@", id)
         
         do {
