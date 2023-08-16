@@ -79,9 +79,7 @@ final class CoreDataManager {
         return container
     }()
     
-    private var context: NSManagedObjectContext {
-        return CoreDataManager.persistentContainer.viewContext
-    }
+    private let context: NSManagedObjectContext = CoreDataManager.persistentContainer.viewContext
     
     func save(_ data: Interactionable) throws {
         guard let entity = NSEntityDescription.entity(forEntityName: type(of: data).entityName, in: context) else {

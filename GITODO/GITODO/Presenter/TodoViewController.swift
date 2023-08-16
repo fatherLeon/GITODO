@@ -202,6 +202,7 @@ extension TodoViewController {
         self.navigationItem.title = "GITODO"
         self.addAnimationView.frame.size = CGSize(width: 30, height: 30)
         self.addAnimationView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(clickedAddButton)))
+        
         let barbutton = UIBarButtonItem(customView: addAnimationView)
         
         barbutton.target = self
@@ -264,7 +265,7 @@ extension TodoViewController {
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: calendarView.bottomAnchor),
+            tableView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
