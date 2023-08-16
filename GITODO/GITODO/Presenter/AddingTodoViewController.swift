@@ -9,6 +9,7 @@ import UIKit
 
 class AddingTodoViewController: UIViewController {
     
+    private let targetedDate: Date
     private let coredataManager = CoreDataManager.shared
     
     private let headTextField: UITextField = {
@@ -35,7 +36,7 @@ class AddingTodoViewController: UIViewController {
         picker.translatesAutoresizingMaskIntoConstraints = false
         picker.preferredDatePickerStyle = .wheels
         picker.locale = Locale(identifier: "ko_KR")
-        picker.datePickerMode = .dateAndTime
+        picker.datePickerMode = .time
         
         return picker
     }()
@@ -68,6 +69,15 @@ class AddingTodoViewController: UIViewController {
         
         return hStack
     }()
+    
+    init(targetedDate: Date) {
+        self.targetedDate = targetedDate
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -108,7 +118,7 @@ extension AddingTodoViewController {
     private func configureHeadTextField() {
         self.view.addSubview(headTextField)
         
-        headTextField.layer.cornerRadius = self.view.frame.height / 40
+        headTextField.layer.cornerRadius = 10
         headTextField.layer.borderWidth = 0.25
         headTextField.layer.borderColor = UIColor.gray.cgColor
         
@@ -144,6 +154,7 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
+        datePicker.setDate(targetedDate, animated: true)
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([

@@ -12,6 +12,7 @@ import Lottie
 final class TodoViewController: UIViewController {
     
     private let today = Date()
+    private var selectedDate = Date()
     private var currentPage: Date?
     private var todos: [TodoObject] = []
     private let coredataManager = CoreDataManager.shared
@@ -101,7 +102,7 @@ final class TodoViewController: UIViewController {
         
         leftArrowButton.addTarget(self, action: #selector(clickedLeftArrowBtn), for: .touchUpInside)
         rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
-        calendarButton.addTarget(self, action: #selector(moveTodayWeek), for: .touchUpInside)
+        calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         changedTargetDate(today)
     }
@@ -160,7 +161,7 @@ final class TodoViewController: UIViewController {
         calendarView.setCurrentPage(page, animated: true)
     }
     
-    @objc func moveTodayWeek() {
+    @objc func clickedCalendarBtn() {
         if scopeMode == .month {
             calendarView.scope = .week
             scopeMode = .week
@@ -175,7 +176,7 @@ final class TodoViewController: UIViewController {
             
             UIView.animate(withDuration: 0.5) {
                 self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
-                self.rightArrowButton.transform = CGAffineTransform(rotationAngle: 0)
+                self.rightArrowButton.transform = .identity
             }
         }
     }
@@ -183,7 +184,7 @@ final class TodoViewController: UIViewController {
     @objc func clickedAddButton() {
         addAnimationView.play()
         
-        self.present(AddingTodoViewController(), animated: true)
+        self.present(AddingTodoViewController(targetedDate: selectedDate), animated: true)
     }
 }
 
@@ -293,6 +294,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+        self.selectedDate = date
         changedTargetDate(date)
     }
     
