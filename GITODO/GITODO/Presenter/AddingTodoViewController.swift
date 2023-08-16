@@ -10,6 +10,8 @@ import UIKit
 class AddingTodoViewController: UIViewController {
     
     private let targetedDate: Date
+    private let titleText: String?
+    private let memoText: String?
     private let coredataManager = CoreDataManager.shared
     
     private let headTextField: UITextField = {
@@ -25,8 +27,9 @@ class AddingTodoViewController: UIViewController {
         let view = UITextView()
         
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.text = "할 일에 대한 메모를 입력해주세요"
+        view.text = "메모를 입력해주세요"
         view.font = .preferredFont(forTextStyle: .callout)
+        view.textColor = .placeholderText
         
         return view
     }()
@@ -70,8 +73,11 @@ class AddingTodoViewController: UIViewController {
         return hStack
     }()
     
-    init(targetedDate: Date) {
+    init(targetedDate: Date, titleText: String? = nil, memoText: String? = nil) {
         self.targetedDate = targetedDate
+        self.titleText = titleText
+        self.memoText = memoText
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -104,6 +110,16 @@ class AddingTodoViewController: UIViewController {
     }
 }
 
+// MARK: TextViewDelegate
+extension AddingTodoViewController: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == "메모를 입력해주세요" {
+            textView.text = ""
+            textView.textColor = .label
+        }
+    }
+}
+
 // MARK: UI
 extension AddingTodoViewController {
     private func configureUI() {
@@ -116,6 +132,8 @@ extension AddingTodoViewController {
     }
     
     private func configureHeadTextField() {
+        headTextField.text = titleText ?? ""
+        
         self.view.addSubview(headTextField)
         
         headTextField.layer.cornerRadius = 10
@@ -138,6 +156,9 @@ extension AddingTodoViewController {
     }
     
     private func configureContentTextView() {
+        contentTextView.delegate = self
+        contentTextView.text = memoText ?? "메모를 입력해주세요"
+        
         self.view.addSubview(contentTextView)
         
         contentTextView.textColor = .secondaryLabel
