@@ -138,7 +138,7 @@ final class CoreDataManager {
         }
     }
     
-    func search(_ storedDate: Date, type: Interactionable.Type) throws -> Interactionable? {
+    func search(_ storedDate: Date, type: Interactionable.Type) throws -> NSManagedObject {
         let request = type.entityType.fetchRequest()
         let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
         
@@ -146,18 +146,26 @@ final class CoreDataManager {
         request.predicate = NSPredicate(format: "storedDate == %@", storedDate as NSDate)
         
         do {
-            guard let results = try context.fetch(request) as? [NSManagedObject] else {
-                return nil
+            guard let result = try context.fetch(request).first as? NSManagedObject else {
+                throw DBError.fetchError
             }
             
-            return results.compactMap { object in
-                return type.transform(object)
-            }.first
+            return result
         } catch {
             throw DBError.fetchError
         }
     }
     
-    func update(previous: Interactionable, next: Interactionable, type: Interactionable.Type) {
+    func update(storedDate: Date, data: Interactionable, type: Interactionable.Type) {
+        guard let object = try? search(storedDate, type: type) else { return }
+        
+        let mirroredData = Mirror(reflecting: data)
+        
+        for child in mirroredData.children {
+            guard let label = child.label else { continue }
+            object.setValue(child.value, forKey: label)
+        }
+        
+        try? context.save()
     }
 }

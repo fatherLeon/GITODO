@@ -115,20 +115,30 @@ class AddingTodoViewController: UIViewController {
     }
     
     private func save() {
+        guard let todo = makeTodoObject() else { return }
+        
+        try? coredataManager.save(todo)
+    }
+    
+    private func update() {
+        guard let storedDate = todoObject?.storedDate,
+              let todo = makeTodoObject() else { return }
+        
+        coredataManager.update(storedDate: storedDate, data: todo, type: TodoObject.self)
+    }
+    
+    private func makeTodoObject() -> TodoObject? {
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: datePicker.date)
         guard let year = components.year,
               let month = components.month,
               let day = components.day,
               let hour = components.hour,
               let minute = components.minute,
-              let second = components.second else { return }
+              let second = components.second else { return nil }
         
         let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: Date())
         
-        try? coredataManager.save(todo)
-    }
-    
-    private func update() {
+        return todo
     }
 }
 
