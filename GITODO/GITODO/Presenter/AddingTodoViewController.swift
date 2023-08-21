@@ -91,6 +91,12 @@ class AddingTodoViewController: UIViewController {
         configureUI()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        self.view.endEditing(false)
+    }
+    
     @objc private func clickedSaveButton() {
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: datePicker.date)
         guard let year = components.year,
@@ -102,11 +108,12 @@ class AddingTodoViewController: UIViewController {
         let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), title: headTextField.text!, memo: contentTextView.text)
         
         try? coredataManager.save(todo)
-        dismiss(animated: true)
+        
+        self.dismiss(animated: true)
     }
     
     @objc private func clickedCancelButton() {
-        dismiss(animated: true)
+        self.dismiss(animated: true)
     }
 }
 
@@ -168,7 +175,7 @@ extension AddingTodoViewController {
         contentTextView.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         
         NSLayoutConstraint.activate([
-            contentTextView.topAnchor.constraint(equalTo: headTextField.bottomAnchor, constant: 20),
+            contentTextView.topAnchor.constraint(equalTo: headTextField.bottomAnchor, constant: 10),
             contentTextView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             contentTextView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
         ])
@@ -200,7 +207,7 @@ extension AddingTodoViewController {
         NSLayoutConstraint.activate([
             buttonsStack.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             buttonsStack.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            buttonsStack.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+            buttonsStack.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -10),
             buttonsStack.heightAnchor.constraint(equalToConstant: self.view.frame.height / 20)
         ])
     }

@@ -190,17 +190,17 @@ final class TodoViewController: UIViewController {
     }
     
     private func changeWeekScope() {
-//        UIView.animate(withDuration: 0.5) {
-//            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
-//            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
-//        }
+        UIView.animate(withDuration: 0.5) {
+            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
+            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+        }
     }
     
     private func changeMonthScope() {
-//        UIView.animate(withDuration: 0.5) {
-//            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
-//            self.rightArrowButton.transform = .identity
-//        }
+        UIView.animate(withDuration: 0.5) {
+            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
+            self.rightArrowButton.transform = .identity
+        }
     }
 }
 
@@ -233,6 +233,8 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
         let targetedDate = components.date ?? Date()
         
         self.present(AddingTodoViewController(targetedDate: targetedDate, titleText: todo.title, memoText: todo.memo), animated: true)
+        
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
