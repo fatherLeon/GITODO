@@ -10,6 +10,7 @@ import Foundation
 
 protocol Interactionable {
     var id: String { get set }
+    var storedDate: Date { get set }
     static var entityType: NSManagedObject.Type { get set }
     static var entityName: String { get set }
     
@@ -22,23 +23,27 @@ struct TodoObject: Interactionable {
     static var entityName: String = "Todo"
     
     var id: String
+    var storedDate: Date
     let year: Int16
     let month: Int16
     let day: Int16
     let hour: Int16
     let minute: Int16
+    var second: Int16
     let title: String
     let memo: String
     
-    init(year: Int16, month: Int16, day: Int16, hour: Int16, minute: Int16, title: String, memo: String) {
+    init(year: Int16, month: Int16, day: Int16, hour: Int16, minute: Int16, second: Int16, title: String, memo: String, storedDate: Date) {
         self.year = year
         self.month = month
         self.day = day
         self.hour = hour
         self.minute = minute
+        self.second = second
         self.id = "\(year)-\(month)-\(day)"
         self.title = title
         self.memo = memo
+        self.storedDate = storedDate
     }
     
     func transform() -> NSManagedObject {
@@ -55,9 +60,10 @@ struct TodoObject: Interactionable {
     static func transform(_ data: NSManagedObject) -> Interactionable? {
         guard let data = data as? Todo,
               let title = data.title,
-              let memo = data.memo else { return nil }
+              let memo = data.memo,
+              let storedDate = data.storedDate else { return nil }
         
-        return TodoObject(year: data.year, month: data.month, day: data.day, hour: data.hour, minute: data.minute, title: title, memo: memo)
+        return TodoObject(year: data.year, month: data.month, day: data.day, hour: data.hour, minute: data.minute, second: data.second, title: title, memo: memo, storedDate: storedDate)
     }
 }
 
@@ -132,7 +138,26 @@ final class CoreDataManager {
         }
     }
     
-    func update() {
+    func search(_ storedDate: Date, type: Interactionable.Type) throws -> Interactionable? {
+        let request = type.entityType.fetchRequest()
+        let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
         
+        request.entity = entity
+        request.predicate = NSPredicate(format: "storedDate == %@", storedDate as NSDate)
+        
+        do {
+            guard let results = try context.fetch(request) as? [NSManagedObject] else {
+                return nil
+            }
+            
+            return results.compactMap { object in
+                return type.transform(object)
+            }.first
+        } catch {
+            throw DBError.fetchError
+        }
+    }
+    
+    func update(previous: Interactionable, next: Interactionable, type: Interactionable.Type) {
     }
 }

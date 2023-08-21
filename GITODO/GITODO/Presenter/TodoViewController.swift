@@ -175,7 +175,7 @@ final class TodoViewController: UIViewController {
     @objc func clickedAddButton() {
         addAnimationView.play()
         
-        self.present(AddingTodoViewController(targetedDate: selectedDate), animated: true)
+        self.present(AddingTodoViewController(), animated: true)
     }
     
     @objc func panView(_ swipe: UIPanGestureRecognizer) {
@@ -224,17 +224,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let todo = todos[indexPath.row]
-        var components = DateComponents()
-        
-        components.year = Int(todo.year)
-        components.month = Int(todo.month)
-        components.day = Int(todo.day)
-        components.hour = Int(todo.hour)
-        components.minute = Int(todo.minute)
-
-        let targetedDate = components.date ?? Date()
-        
-        self.present(AddingTodoViewController(targetedDate: targetedDate, titleText: todo.title, memoText: todo.memo), animated: true)
+        self.present(AddingTodoViewController(todoObject: todo), animated: true)
         
         tableView.deselectRow(at: indexPath, animated: true)
     }

@@ -9,9 +9,7 @@ import UIKit
 
 class AddingTodoViewController: UIViewController {
     
-    private let targetedDate: Date
-    private let titleText: String?
-    private let memoText: String?
+    private let todoObject: TodoObject?
     private let coredataManager = CoreDataManager.shared
     
     private let minusView: MinusView = {
@@ -80,10 +78,8 @@ class AddingTodoViewController: UIViewController {
         return hStack
     }()
     
-    init(targetedDate: Date, titleText: String? = nil, memoText: String? = nil) {
-        self.targetedDate = targetedDate
-        self.titleText = titleText
-        self.memoText = memoText
+    init(todoObject: TodoObject? = nil) {
+        self.todoObject = todoObject
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -105,22 +101,34 @@ class AddingTodoViewController: UIViewController {
     }
     
     @objc private func clickedSaveButton() {
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: datePicker.date)
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day,
-              let hour = components.hour,
-              let minute = components.minute else { return }
-        
-        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), title: headTextField.text!, memo: contentTextView.text)
-        
-        try? coredataManager.save(todo)
+        if todoObject == nil {
+            save()
+        } else {
+            update()
+        }
         
         self.dismiss(animated: true)
     }
     
     @objc private func clickedCancelButton() {
         self.dismiss(animated: true)
+    }
+    
+    private func save() {
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: datePicker.date)
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day,
+              let hour = components.hour,
+              let minute = components.minute,
+              let second = components.second else { return }
+        
+        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: Date())
+        
+        try? coredataManager.save(todo)
+    }
+    
+    private func update() {
     }
 }
 
@@ -158,7 +166,7 @@ extension AddingTodoViewController {
     }
     
     private func configureHeadTextField() {
-        headTextField.text = titleText ?? ""
+        headTextField.text = todoObject?.title ?? ""
         
         self.view.addSubview(headTextField)
         
@@ -183,7 +191,7 @@ extension AddingTodoViewController {
     
     private func configureContentTextView() {
         contentTextView.delegate = self
-        contentTextView.text = memoText ?? "메모를 입력해주세요"
+        contentTextView.text = todoObject?.memo ?? "메모를 입력해주세요"
         
         self.view.addSubview(contentTextView)
         
@@ -201,7 +209,6 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
-        datePicker.setDate(targetedDate, animated: true)
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([
@@ -210,6 +217,23 @@ extension AddingTodoViewController {
             datePicker.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
             datePicker.bottomAnchor.constraint(equalTo: buttonsStack.topAnchor)
         ])
+        
+        guard let todo = todoObject else {
+            datePicker.setDate(Date(), animated: true)
+            return
+        }
+        
+        var components = DateComponents()
+        
+        components.year = Int(todo.year)
+        components.month = Int(todo.month)
+        components.day = Int(todo.day)
+        components.hour = Int(todo.hour)
+        components.minute = Int(todo.minute)
+        
+        let targetedDate = Calendar.current.date(from: components) ?? Date()
+        
+        datePicker.setDate(targetedDate, animated: true)
     }
     
     private func configureSaveAndCancelButton() {
