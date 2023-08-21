@@ -168,4 +168,10 @@ final class CoreDataManager {
         
         try? context.save()
     }
+    
+    func delete(storedDate: Date, type: Interactionable.Type) {
+        guard let object = try? search(storedDate, type: type) else { return }
+        
+        context.delete(object)
+    }
 }

@@ -111,29 +111,7 @@ final class TodoViewController: UIViewController {
         rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
-        changedTargetDate(today)
-    }
-    
-    private func changedTargetDate(_ date: Date) {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day else { return }
-        
-        let targetId = "\(year)-\(month)-\(day)"
-        
-        do {
-            guard let todos = try coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
-                self.todos = []
-                return
-            }
-            
-            self.todos = todos
-            self.tableView.reloadData()
-        } catch {
-            print("Error - Search Error")
-        }
+        updateTableView(by: today)
     }
     
     @objc func clickedRightArrowBtn() {
@@ -191,6 +169,32 @@ final class TodoViewController: UIViewController {
         calendarView.handleScopeGesture(swipe)
     }
     
+    private func updateTableView(by date: Date) {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else { return }
+        
+        let targetId = "\(year)-\(month)-\(day)"
+        
+        do {
+            guard let todos = try coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
+                self.todos = []
+                return
+            }
+            
+            self.todos = todos
+            self.tableView.reloadData()
+        } catch {
+            print("Error - Search Error")
+        }
+    }
+    
+    private func deleteTodo(todo: TodoObject) {
+        coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
+    }
+    
     private func changeWeekScope() {
         UIView.animate(withDuration: 0.5) {
             self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
@@ -227,6 +231,21 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
         self.present(AddingTodoViewController(todoObject: todo), animated: true)
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let todo = todos[indexPath.row]
+        let deleteAction = UIContextualAction(style: .normal, title: nil) { _, _, completion in
+            self.deleteTodo(todo: todo)
+            self.todos.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            completion(true)
+        }
+        
+        deleteAction.backgroundColor = .red
+        deleteAction.image = UIImage(systemName: "trash.fill")
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 
@@ -334,7 +353,7 @@ extension TodoViewController {
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate = date
-        changedTargetDate(date)
+        updateTableView(by: date)
     }
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
