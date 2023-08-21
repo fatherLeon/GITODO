@@ -14,6 +14,13 @@ class AddingTodoViewController: UIViewController {
     private let memoText: String?
     private let coredataManager = CoreDataManager.shared
     
+    private let minusView: MinusView = {
+        let view = MinusView()
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
     private let headTextField: UITextField = {
         let view = UITextField()
         
@@ -132,10 +139,22 @@ extension AddingTodoViewController {
     private func configureUI() {
         self.view.backgroundColor = .systemBackground
         
+        configureMinusView()
         configureHeadTextField()
         configureContentTextView()
         configureSaveAndCancelButton()
         configureDatePicker()
+    }
+    
+    private func configureMinusView() {
+        self.view.addSubview(minusView)
+        
+        NSLayoutConstraint.activate([
+            minusView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 5),
+            minusView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            minusView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            minusView.heightAnchor.constraint(equalToConstant: 10)
+        ])
     }
     
     private func configureHeadTextField() {
@@ -155,7 +174,7 @@ extension AddingTodoViewController {
         headTextField.rightViewMode = .always
         
         NSLayoutConstraint.activate([
-            headTextField.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            headTextField.topAnchor.constraint(equalTo: minusView.bottomAnchor, constant: 10),
             headTextField.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             headTextField.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             headTextField.heightAnchor.constraint(equalToConstant: self.view.frame.height / 20)

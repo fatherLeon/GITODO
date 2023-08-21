@@ -161,13 +161,7 @@ final class TodoViewController: UIViewController {
     }
     
     @objc func clickedCalendarBtn() {
-        if calendarView.scope == .month {
-            changeWeekScope()
-            calendarView.setScope(.week, animated: true)
-        } else {
-            changeMonthScope()
-            calendarView.setScope(.month, animated: true)
-        }
+        calendarView.setCurrentPage(Date(), animated: true)
     }
     
     @objc func clickedAddButton() {
@@ -295,7 +289,7 @@ extension TodoViewController {
     private func configureCalendarView() {
         let scopeGesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
         self.view.addGestureRecognizer(scopeGesture)
-        self.tableView.panGestureRecognizer.require(toFail: scopeGesture)
+//        self.tableView.panGestureRecognizer.require(toFail: scopeGesture)
         
         calendarView.delegate = self
         calendarView.dataSource = self
