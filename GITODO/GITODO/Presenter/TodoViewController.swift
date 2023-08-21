@@ -17,7 +17,6 @@ final class TodoViewController: UIViewController {
     private var todos: [TodoObject] = []
     private let coredataManager = CoreDataManager.shared
     private var calendarHeightAnchor: NSLayoutConstraint?
-    private var scopeMode: FSCalendarScope = .week
     
     private let calendarHeaderStackView: UIStackView = {
         let headerStack = UIStackView()
@@ -133,7 +132,7 @@ final class TodoViewController: UIViewController {
         let calendar = Calendar.current
         var dateComponents = DateComponents()
         
-        if scopeMode == .week {
+        if calendarView.scope == .week {
             dateComponents.weekOfMonth = 1
             currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
         } else {
@@ -149,7 +148,7 @@ final class TodoViewController: UIViewController {
         let calendar = Calendar.current
         var dateComponents = DateComponents()
         
-        if scopeMode == .week {
+        if calendarView.scope == .week {
             dateComponents.weekOfMonth = -1
             currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
         } else {
@@ -162,22 +161,12 @@ final class TodoViewController: UIViewController {
     }
     
     @objc func clickedCalendarBtn() {
-        if scopeMode == .month {
-            calendarView.scope = .week
-            scopeMode = .week
-            
-            UIView.animate(withDuration: 0.5) {
-                self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
-                self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
-            }
+        if calendarView.scope == .month {
+            changeWeekScope()
+            calendarView.setScope(.week, animated: true)
         } else {
-            calendarView.scope = .month
-            scopeMode = .month
-            
-            UIView.animate(withDuration: 0.5) {
-                self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
-                self.rightArrowButton.transform = .identity
-            }
+            changeMonthScope()
+            calendarView.setScope(.month, animated: true)
         }
     }
     
@@ -185,6 +174,33 @@ final class TodoViewController: UIViewController {
         addAnimationView.play()
         
         self.present(AddingTodoViewController(targetedDate: selectedDate), animated: true)
+    }
+    
+    @objc func panView(_ swipe: UIPanGestureRecognizer) {
+        switch calendarView.scope {
+        case .month:
+            changeWeekScope()
+        case .week:
+            changeMonthScope()
+        default:
+            return
+        }
+        
+        calendarView.handleScopeGesture(swipe)
+    }
+    
+    private func changeWeekScope() {
+//        UIView.animate(withDuration: 0.5) {
+//            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
+//            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+//        }
+    }
+    
+    private func changeMonthScope() {
+//        UIView.animate(withDuration: 0.5) {
+//            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
+//            self.rightArrowButton.transform = .identity
+//        }
     }
 }
 
@@ -275,6 +291,10 @@ extension TodoViewController {
     }
     
     private func configureCalendarView() {
+        let scopeGesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
+        self.view.addGestureRecognizer(scopeGesture)
+        self.tableView.panGestureRecognizer.require(toFail: scopeGesture)
+        
         calendarView.delegate = self
         calendarView.dataSource = self
         
@@ -332,10 +352,7 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         calendarHeightAnchor?.constant = bounds.height
-        
-        UIView.animate(withDuration: 0.5) {
-            self.view.layoutIfNeeded()
-        }
+        self.view.layoutIfNeeded()
     }
     
     func calendar(_ calendar: FSCalendar, willDisplay cell: FSCalendarCell, for date: Date, at monthPosition: FSCalendarMonthPosition) {
