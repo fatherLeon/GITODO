@@ -93,6 +93,14 @@ final class TodoViewController: UIViewController {
         
         return view
     }()
+    private let minusView: MinusView = {
+        let view = MinusView()
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .lightGray
+        
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -240,6 +248,7 @@ extension TodoViewController {
         configureNavigationHeaderView()
         configureCalendarHeaderView()
         configureCalendarView()
+        configureMinusView()
         configureTableView()
     }
     
@@ -287,10 +296,6 @@ extension TodoViewController {
     }
     
     private func configureCalendarView() {
-        let scopeGesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
-        self.view.addGestureRecognizer(scopeGesture)
-//        self.tableView.panGestureRecognizer.require(toFail: scopeGesture)
-        
         calendarView.delegate = self
         calendarView.dataSource = self
         
@@ -306,6 +311,19 @@ extension TodoViewController {
         calendarHeightAnchor?.isActive = true
     }
     
+    private func configureMinusView() {
+        let scopeGesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
+        minusView.addGestureRecognizer(scopeGesture)
+        view.addSubview(minusView)
+        
+        NSLayoutConstraint.activate([
+            minusView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 20),
+            minusView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            minusView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            minusView.heightAnchor.constraint(equalToConstant: 10)
+        ])
+    }
+    
     private func configureTableView() {
         tableView.delegate = self
         tableView.dataSource = self
@@ -314,7 +332,7 @@ extension TodoViewController {
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: calendarView.bottomAnchor, constant: 20),
+            tableView.topAnchor.constraint(equalTo: minusView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -348,7 +366,6 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         calendarHeightAnchor?.constant = bounds.height
-        self.view.layoutIfNeeded()
     }
     
     func calendar(_ calendar: FSCalendar, willDisplay cell: FSCalendarCell, for date: Date, at monthPosition: FSCalendarMonthPosition) {
