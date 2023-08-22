@@ -9,6 +9,10 @@ import UIKit
 import FSCalendar
 import Lottie
 
+protocol AddingTodoDelegate: AnyObject {
+    func updateTableView(by date: Date)
+}
+
 final class TodoViewController: UIViewController {
     
     private let today = Date()
@@ -161,7 +165,7 @@ final class TodoViewController: UIViewController {
     @objc func clickedAddButton() {
         addAnimationView.play()
         
-        self.present(AddingTodoViewController(), animated: true)
+        presentAddingTodoVC(targetDate: selectedDate, delegate: self)
     }
     
     @objc func panView(_ swipe: UIPanGestureRecognizer) {
@@ -177,7 +181,34 @@ final class TodoViewController: UIViewController {
         calendarView.handleScopeGesture(swipe)
     }
     
-    private func updateTableView(by date: Date) {
+    private func deleteTodo(todo: TodoObject) {
+        coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
+    }
+    
+    private func changeWeekArrow() {
+        UIView.animate(withDuration: 0.5) {
+            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
+            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
+        }
+    }
+    
+    private func changeMonthArrow() {
+        UIView.animate(withDuration: 0.5) {
+            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
+            self.rightArrowButton.transform = .identity
+        }
+    }
+    
+    private func presentAddingTodoVC(todoObject: TodoObject? = nil, targetDate: Date, delegate: AddingTodoDelegate? = nil) {
+        let targetVC = AddingTodoViewController(todoObject: todoObject, targetDate: targetDate, delegate: delegate)
+        
+        self.present(targetVC, animated: true)
+    }
+}
+
+// MARK: AddingTodoDelegate
+extension TodoViewController: AddingTodoDelegate {
+    func updateTableView(by date: Date) {
         let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
         
         guard let year = components.year,
@@ -196,24 +227,6 @@ final class TodoViewController: UIViewController {
             self.tableView.reloadData()
         } catch {
             print("Error - Search Error")
-        }
-    }
-    
-    private func deleteTodo(todo: TodoObject) {
-        coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
-    }
-    
-    private func changeWeekArrow() {
-        UIView.animate(withDuration: 0.5) {
-            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
-            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
-        }
-    }
-    
-    private func changeMonthArrow() {
-        UIView.animate(withDuration: 0.5) {
-            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
-            self.rightArrowButton.transform = .identity
         }
     }
 }
@@ -266,9 +279,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
             tableView.deselectRow(at: indexPath, animated: true)
             return
         }
-        
-        self.present(AddingTodoViewController(todoObject: todo), animated: true)
-        
+        presentAddingTodoVC(todoObject: todo, targetDate: selectedDate, delegate: self)
         tableView.deselectRow(at: indexPath, animated: true)
     }
     

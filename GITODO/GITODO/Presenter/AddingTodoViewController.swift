@@ -9,8 +9,10 @@ import UIKit
 
 class AddingTodoViewController: UIViewController {
     
+    private let targetDate: Date
     private let todoObject: TodoObject?
     private let coredataManager = CoreDataManager.shared
+    private weak var delegate: AddingTodoDelegate?
     
     private let minusView: MinusView = {
         let view = MinusView()
@@ -78,8 +80,10 @@ class AddingTodoViewController: UIViewController {
         return hStack
     }()
     
-    init(todoObject: TodoObject? = nil) {
+    init(todoObject: TodoObject? = nil, targetDate: Date = Date(), delegate: AddingTodoDelegate? = nil) {
         self.todoObject = todoObject
+        self.targetDate = targetDate
+        self.delegate = delegate
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -107,6 +111,7 @@ class AddingTodoViewController: UIViewController {
             update()
         }
         
+        delegate?.updateTableView(by: datePicker.date)
         self.dismiss(animated: true)
     }
     
@@ -136,7 +141,7 @@ class AddingTodoViewController: UIViewController {
               let minute = components.minute,
               let second = components.second else { return nil }
         
-        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: Date())
+        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: targetDate)
         
         return todo
     }
@@ -229,7 +234,7 @@ extension AddingTodoViewController {
         ])
         
         guard let todo = todoObject else {
-            datePicker.setDate(Date(), animated: true)
+            datePicker.setDate(targetDate, animated: true)
             return
         }
         
@@ -241,7 +246,7 @@ extension AddingTodoViewController {
         components.hour = Int(todo.hour)
         components.minute = Int(todo.minute)
         
-        let targetedDate = Calendar.current.date(from: components) ?? Date()
+        let targetedDate = Calendar.current.date(from: components) ?? targetDate
         
         datePicker.setDate(targetedDate, animated: true)
     }
