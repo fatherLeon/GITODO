@@ -19,8 +19,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         let window = UIWindow(windowScene: windowScene)
+        let tabbarController = UITabBarController()
         
-        window.rootViewController = UINavigationController(rootViewController: TodoViewController())
+        let todoPresenter = UINavigationController(rootViewController: TodoViewController())
+        let settingPresenter = UINavigationController(rootViewController: SettingViewController())
+        
+        todoPresenter.tabBarItem.image = UIImage(systemName: "calendar")
+        settingPresenter.tabBarItem.image = UIImage(systemName: "gearshape.fill")
+        
+        tabbarController.viewControllers = [todoPresenter, settingPresenter]
+        
+        window.rootViewController = tabbarController
         window.makeKeyAndVisible()
         
         self.window = window
