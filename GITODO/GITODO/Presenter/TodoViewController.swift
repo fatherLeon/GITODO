@@ -17,6 +17,15 @@ final class TodoViewController: UIViewController {
     private var todos: [TodoObject] = []
     private let coredataManager = CoreDataManager.shared
     private var calendarHeightAnchor: NSLayoutConstraint?
+    private lazy var gesture: UIPanGestureRecognizer = {
+        let gesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
+        
+        gesture.delegate = self
+        gesture.minimumNumberOfTouches = 1
+        gesture.maximumNumberOfTouches = 2
+        
+        return gesture
+    }()
     
     private let calendarHeaderStackView: UIStackView = {
         let headerStack = UIStackView()
@@ -49,7 +58,6 @@ final class TodoViewController: UIViewController {
         
         calendar.headerHeight = 0
         calendar.scope = .week
-        calendar.scrollDirection = .vertical
         calendar.locale = Locale.current
         calendar.appearance.selectionColor = .red
         calendar.appearance.todayColor = .blue
@@ -97,7 +105,6 @@ final class TodoViewController: UIViewController {
         let view = MinusView()
         
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .lightGray
         
         return view
     }()
@@ -106,6 +113,7 @@ final class TodoViewController: UIViewController {
         super.viewDidLoad()
         
         configureUI()
+        configureGesture()
         
         leftArrowButton.addTarget(self, action: #selector(clickedLeftArrowBtn), for: .touchUpInside)
         rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
@@ -147,7 +155,7 @@ final class TodoViewController: UIViewController {
     }
     
     @objc func clickedCalendarBtn() {
-        calendarView.setCurrentPage(Date(), animated: true)
+        calendarView.setCurrentPage(today, animated: true)
     }
     
     @objc func clickedAddButton() {
@@ -159,11 +167,9 @@ final class TodoViewController: UIViewController {
     @objc func panView(_ swipe: UIPanGestureRecognizer) {
         switch calendarView.scope {
         case .month:
-            changeWeekScope()
+            changeWeekArrow()
         case .week:
-            changeMonthScope()
-        default:
-            return
+            changeMonthArrow()
         }
         
         calendarView.handleScopeGesture(swipe)
@@ -195,18 +201,37 @@ final class TodoViewController: UIViewController {
         coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
     }
     
-    private func changeWeekScope() {
+    private func changeWeekArrow() {
         UIView.animate(withDuration: 0.5) {
             self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
             self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
         }
     }
     
-    private func changeMonthScope() {
+    private func changeMonthArrow() {
         UIView.animate(withDuration: 0.5) {
             self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
             self.rightArrowButton.transform = .identity
         }
+    }
+}
+
+// MARK: Gesture Delegate
+extension TodoViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let shouldBegin = self.tableView.contentOffset.y <= -self.tableView.contentInset.top
+        if shouldBegin {
+            let velocity = self.gesture.velocity(in: self.view)
+            switch self.calendarView.scope {
+            case .month:
+                return velocity.y < 0
+            case .week:
+                return velocity.y > 0
+            @unknown default:
+                return velocity.y == 0
+            }
+        }
+        return shouldBegin
     }
 }
 
@@ -249,7 +274,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: UI
+// MARK: Init Configuration
 extension TodoViewController {
     private func configureUI() {
         view.backgroundColor = .systemBackground
@@ -321,8 +346,6 @@ extension TodoViewController {
     }
     
     private func configureMinusView() {
-        let scopeGesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
-        minusView.addGestureRecognizer(scopeGesture)
         view.addSubview(minusView)
         
         NSLayoutConstraint.activate([
@@ -346,6 +369,11 @@ extension TodoViewController {
             tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+    }
+    
+    private func configureGesture() {
+        self.view.addGestureRecognizer(gesture)
+        self.tableView.panGestureRecognizer.require(toFail: gesture)
     }
 }
 
@@ -374,10 +402,13 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
-        calendarHeightAnchor?.constant = bounds.height
-    }
-    
-    func calendar(_ calendar: FSCalendar, willDisplay cell: FSCalendarCell, for date: Date, at monthPosition: FSCalendarMonthPosition) {
-        cell.eventIndicator.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
+        self.calendarHeightAnchor?.constant = bounds.height
+        self.view.layoutIfNeeded()
+        
+        if bounds.height >= self.view.frame.height / 3 {
+            calendarView.scrollDirection = .vertical
+        } else {
+            calendarView.scrollDirection = .horizontal
+        }
     }
 }
