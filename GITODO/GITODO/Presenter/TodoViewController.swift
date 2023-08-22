@@ -170,6 +170,8 @@ final class TodoViewController: UIViewController {
             changeWeekArrow()
         case .week:
             changeMonthArrow()
+        @unknown default:
+            return
         }
         
         calendarView.handleScopeGesture(swipe)
@@ -238,21 +240,33 @@ extension TodoViewController: UIGestureRecognizerDelegate {
 // MARK: TableView delegate datasource
 extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todos.count
+        let boundaryCellNum = 10
+        
+        if todos.count < boundaryCellNum {
+            return boundaryCellNum
+        } else {
+            return todos.count
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell,
+              let title = todos[safe: indexPath.row]?.title else {
             return UITableViewCell()
         }
         
-        cell.updateTitle(todos[indexPath.row].title)
+        cell.updateTitle(title)
+        cell.accessoryType = .disclosureIndicator
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let todo = todos[indexPath.row]
+        guard let todo = todos[safe: indexPath.row] else {
+            tableView.deselectRow(at: indexPath, animated: true)
+            return
+        }
+        
         self.present(AddingTodoViewController(todoObject: todo), animated: true)
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -271,6 +285,10 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
         deleteAction.image = UIImage(systemName: "trash.fill")
         
         return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return self.view.bounds.height / 2 / 10
     }
 }
 
