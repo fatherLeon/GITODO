@@ -156,7 +156,7 @@ final class CoreDataManager {
         }
     }
     
-    func update(storedDate: Date, data: Interactionable, type: Interactionable.Type) {
+    func update(storedDate: Date, data: Interactionable, type: Interactionable.Type) throws {
         guard let object = try? search(storedDate, type: type) else { return }
         
         let mirroredData = Mirror(reflecting: data)
@@ -166,12 +166,19 @@ final class CoreDataManager {
             object.setValue(child.value, forKey: label)
         }
         
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            throw DBError.updateError
+        }
     }
     
-    func delete(storedDate: Date, type: Interactionable.Type) {
-        guard let object = try? search(storedDate, type: type) else { return }
-        
-        context.delete(object)
+    func delete(storedDate: Date, type: Interactionable.Type) throws{
+        do {
+            let object = try search(storedDate, type: type)
+            context.delete(object)
+        } catch {
+            throw DBError.deleteError
+        }
     }
 }

@@ -105,31 +105,47 @@ class AddingTodoViewController: UIViewController {
     }
     
     @objc private func clickedSaveButton() {
+        var result = true
+        
         if todoObject == nil {
-            save()
+            result = save()
         } else {
-            update()
+            result = update()
         }
         
-        delegate?.updateTableView(by: datePicker.date)
-        self.dismiss(animated: true)
+        if result {
+            delegate?.updateTableView(by: datePicker.date)
+            self.dismiss(animated: true)
+        }
     }
     
     @objc private func clickedCancelButton() {
         self.dismiss(animated: true)
     }
     
-    private func save() {
-        guard let todo = makeTodoObject() else { return }
+    private func save() -> Bool {
+        guard let todo = makeTodoObject() else { return false }
         
-        try? coredataManager.save(todo)
+        do {
+            try coredataManager.save(todo)
+            return true
+        } catch {
+            showAlert(title: "저장 실패", message: nil)
+            return false
+        }
     }
     
-    private func update() {
+    private func update() -> Bool {
         guard let storedDate = todoObject?.storedDate,
-              let todo = makeTodoObject() else { return }
+              let todo = makeTodoObject() else { return false }
         
-        coredataManager.update(storedDate: storedDate, data: todo, type: TodoObject.self)
+        do {
+            try coredataManager.update(storedDate: storedDate, data: todo, type: TodoObject.self)
+            return true
+        } catch {
+            showAlert(title: "업데이트 실패", message: nil)
+            return false
+        }
     }
     
     private func makeTodoObject() -> TodoObject? {
@@ -141,7 +157,7 @@ class AddingTodoViewController: UIViewController {
               let minute = components.minute,
               let second = components.second else { return nil }
         
-        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: targetDate)
+        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: Date())
         
         return todo
     }

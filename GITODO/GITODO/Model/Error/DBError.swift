@@ -11,4 +11,6 @@ enum DBError: Error {
     case creationError
     case saveError
     case fetchError
+    case updateError
+    case deleteError
 }

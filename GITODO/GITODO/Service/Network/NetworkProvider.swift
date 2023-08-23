@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NetworkProvider {
+final class NetworkProvider {
     private var session: URLSession
     
     init(session: URLSession = .shared) {
@@ -18,8 +18,8 @@ struct NetworkProvider {
         do {
             let request = try endPoint.makeUrlRequest(httpMethod: .GET)
             
-            session.dataTask(with: request) { data, response, error in
-                checkError(data, response, error) { result in
+            session.dataTask(with: request) { [weak self] data, response, error in
+                self?.checkError(data, response, error) { result in
                     switch result {
                     case .success(let data):
                         do {

@@ -182,8 +182,14 @@ final class TodoViewController: UIViewController {
         calendarView.handleScopeGesture(swipe)
     }
     
-    private func deleteTodo(todo: TodoObject) {
-        coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
+    private func deleteTodo(todo: TodoObject) -> Bool {
+        do {
+            try coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
+            return true
+        } catch {
+            showAlert(title: "삭제 실패", message: nil)
+            return false
+        }
     }
     
     private func changeWeekArrow() {
@@ -286,11 +292,15 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let todo = todos[indexPath.row]
-        let deleteAction = UIContextualAction(style: .normal, title: nil) { _, _, completion in
-            self.deleteTodo(todo: todo)
-            self.todos.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
-            completion(true)
+        let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
+            let result = self?.deleteTodo(todo: todo) ?? true
+            
+            if result {
+                self?.todos.remove(at: indexPath.row)
+                tableView.reloadData()
+                
+                completion(true)
+            }
         }
         
         deleteAction.backgroundColor = .red
