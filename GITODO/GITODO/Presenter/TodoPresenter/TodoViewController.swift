@@ -63,6 +63,7 @@ final class TodoViewController: UIViewController {
         calendar.headerHeight = 0
         calendar.scope = .week
         calendar.locale = Locale.current
+        calendar.appearance.titleDefaultColor = .label
         calendar.appearance.selectionColor = .red
         calendar.appearance.todayColor = .blue
         calendar.appearance.todaySelectionColor = .blue
@@ -424,10 +425,6 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
         return [CustomColor.darkGreen]
-    }
-    
-    func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
-        return [CustomColor.darkGray]
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
