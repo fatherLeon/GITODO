@@ -9,6 +9,8 @@ import Foundation
 
 protocol Requestable {
     var url: URL? { get }
+    
+    func makeUrlRequest(httpMethod: HttpMethod) throws -> URLRequest
 }
 
 enum EndPoint: Requestable {
@@ -43,5 +45,17 @@ enum EndPoint: Requestable {
         urlComponents.path = path
         
         return urlComponents.url
+    }
+    
+    func makeUrlRequest(httpMethod: HttpMethod) throws -> URLRequest {
+        guard let url = url else {
+            throw NetworkError.urlError
+        }
+        
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = httpMethod.method
+        
+        return request
     }
 }
