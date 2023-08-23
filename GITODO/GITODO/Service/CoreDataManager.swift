@@ -177,6 +177,8 @@ final class CoreDataManager {
         do {
             let object = try search(storedDate, type: type)
             context.delete(object)
+            
+            try context.save()
         } catch {
             throw DBError.deleteError
         }
