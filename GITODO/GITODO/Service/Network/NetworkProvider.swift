@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NetworkManager {
+struct NetworkProvider {
     private var session: URLSession
     
     init(session: URLSession = .shared) {

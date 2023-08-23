@@ -7,14 +7,41 @@
 
 import Foundation
 
-enum EndPoint {
+protocol Requestable {
+    var url: URL? { get }
+}
+
+enum EndPoint: Requestable {
     //https://api.github.com/users/geniusin/repos
     case repository(user: String)
     
     //https://api.github.com/repos/fatherLeon/GITODO/commits
     case commits(user: String, repository: String)
     
-    private var root: String {
-        return "https://api.github.com/"
+    private var scheme: String {
+        return "https"
+    }
+    
+    private var host: String {
+        return "api.github.com"
+    }
+    
+    private var path: String {
+        switch self {
+        case .repository(let user):
+            return "users/\(user)/repos"
+        case .commits(let user, let repository):
+            return "repos/\(user)/\(repository)/commits"
+        }
+    }
+    
+    var url: URL? {
+        var urlComponents = URLComponents()
+        
+        urlComponents.scheme = scheme
+        urlComponents.host = host
+        urlComponents.path = path
+        
+        return urlComponents.url
     }
 }
