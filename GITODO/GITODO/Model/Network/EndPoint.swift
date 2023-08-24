@@ -14,11 +14,11 @@ protocol Requestable {
 }
 
 enum EndPoint: Requestable {
-    //https://api.github.com/users/geniusin/repos
+    //https://api.github.com/users/fatherLeon/repos
     case repository(user: String)
     
     //https://api.github.com/repos/fatherLeon/GITODO/commits
-    case commits(user: String, repository: String)
+    case commits(fullName: String)
     
     private var scheme: String {
         return "https"
@@ -32,8 +32,8 @@ enum EndPoint: Requestable {
         switch self {
         case .repository(let user):
             return "users/\(user)/repos"
-        case .commits(let user, let repository):
-            return "repos/\(user)/\(repository)/commits"
+        case .commits(let fullName):
+            return "repos/\(fullName)/commits"
         }
     }
     
