@@ -20,6 +20,8 @@ final class TodoViewController: UIViewController {
     private var currentPage: Date?
     private var todos: [TodoObject] = []
     private let coredataManager = CoreDataManager.shared
+    private let gitManager = GitManager()
+    private var commits: GitCommits = []
     private var calendarHeightAnchor: NSLayoutConstraint?
     private lazy var gesture: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))

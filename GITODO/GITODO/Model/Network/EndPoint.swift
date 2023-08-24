@@ -17,8 +17,8 @@ enum EndPoint: Requestable {
     //https://api.github.com/users/fatherLeon/repos
     case repository(user: String)
     
-    //https://api.github.com/repos/fatherLeon/GITODO/commits
-    case commits(fullName: String)
+    //https://api.github.com/repos/fatherLeon/FOFMAP/commits
+    case commits(fullName: String, perPage: Int = 30, page: Int = 1)
     
     private var scheme: String {
         return "https"
@@ -31,9 +31,21 @@ enum EndPoint: Requestable {
     private var path: String {
         switch self {
         case .repository(let user):
-            return "users/\(user)/repos"
-        case .commits(let fullName):
-            return "repos/\(fullName)/commits"
+            return "/users/\(user)/repos"
+        case .commits(let fullName, _, _):
+            return "/repos/\(fullName)/commits"
+        }
+    }
+    
+    private var querys: [URLQueryItem] {
+        switch self {
+        case .repository(_):
+            return []
+        case .commits(_, let perPage, let page):
+            let perPageItem = URLQueryItem(name: "per_page", value: "\(perPage)")
+            let pageItem = URLQueryItem(name: "page", value: "\(page)")
+            
+            return [perPageItem, pageItem]
         }
     }
     
@@ -43,6 +55,7 @@ enum EndPoint: Requestable {
         urlComponents.scheme = scheme
         urlComponents.host = host
         urlComponents.path = path
+        urlComponents.queryItems = querys
         
         return urlComponents.url
     }
