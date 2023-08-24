@@ -64,6 +64,7 @@ final class TodoViewController: UIViewController {
         
         calendar.headerHeight = 0
         calendar.scope = .week
+        calendar.scrollDirection = .horizontal
         calendar.locale = Locale.current
         calendar.appearance.titleDefaultColor = .label
         calendar.appearance.selectionColor = .red
@@ -128,8 +129,12 @@ final class TodoViewController: UIViewController {
         
         updateTableView(by: today)
         
-        gitManager.searchCommits(by: "fatherLeon/TIL", perPage: 100, page: 2) { commits in
-            print(commits.count)
+        gitManager.searchCommits(by: "fatherLeon/TIL", perPage: 100, page: 1) { [weak self] commits in
+            self?.commits = commits
+            
+            DispatchQueue.main.async {
+                self?.calendarView.reloadData()
+            }
         }
     }
     
@@ -198,6 +203,22 @@ final class TodoViewController: UIViewController {
         }
     }
     
+    private func fetchTodos(by date: Date) -> [TodoObject] {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else { return [] }
+        
+        let targetId = "\(year)-\(month)-\(day)"
+        
+        guard let todos = try? coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
+            return []
+        }
+        
+        return todos
+    }
+    
     private func changeWeekArrow() {
         UIView.animate(withDuration: 0.5) {
             self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
@@ -222,25 +243,11 @@ final class TodoViewController: UIViewController {
 // MARK: AddingTodoDelegate
 extension TodoViewController: AddingTodoDelegate {
     func updateTableView(by date: Date) {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        let todos = fetchTodos(by: date)
         
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day else { return }
-        
-        let targetId = "\(year)-\(month)-\(day)"
-        
-        do {
-            guard let todos = try coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
-                self.todos = []
-                return
-            }
-            
-            self.todos = todos
-            self.tableView.reloadData()
-        } catch {
-            print("Error - Search Error")
-        }
+        self.todos = todos
+        self.tableView.reloadData()
+        self.calendarView.reloadData()
     }
 }
 
@@ -440,17 +447,33 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-        return [CustomColor.darkGreen]
+        let todosNum = fetchTodos(by: date).count
+        
+        if todosNum > 0 {
+            return [.systemGray2]
+        } else {
+            return [.systemBackground]
+        }
+    }
+    
+    func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
+        let todosNum = fetchTodos(by: date).count
+        
+        if todosNum > 0 {
+            return [.systemGray2]
+        } else {
+            return [.systemBackground]
+        }
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         self.calendarHeightAnchor?.constant = bounds.height
         self.view.layoutIfNeeded()
         
-        if bounds.height >= self.view.frame.height / 3 {
-            calendarView.scrollDirection = .vertical
-        } else {
+        if bounds.height < self.view.frame.height / 3 {
             calendarView.scrollDirection = .horizontal
+        } else {
+            calendarView.scrollDirection = .vertical
         }
     }
 }
