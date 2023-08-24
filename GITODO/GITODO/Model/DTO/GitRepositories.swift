@@ -9,7 +9,7 @@ import Foundation
 
 typealias GitRepositories = [GitRepository]
 
-struct GitRepository: Codable {
+struct GitRepository: Decodable {
     let id: Int
     let nodeID, name, fullName: String
 

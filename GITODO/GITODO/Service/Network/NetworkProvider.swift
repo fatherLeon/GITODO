@@ -14,7 +14,7 @@ final class NetworkProvider {
         self.session = session
     }
     
-    func request<D: Decodable, R: Requestable>(with endPoint: R, _ completion: @escaping ((Result<D, Error>) -> Void)) throws {
+    func request<R: Requestable>(by type: Decodable.Type, with endPoint: R, _ completion: @escaping ((Result<Decodable, Error>) -> Void)) throws {
         do {
             let request = try endPoint.makeUrlRequest(httpMethod: .GET)
             
@@ -23,7 +23,7 @@ final class NetworkProvider {
                     switch result {
                     case .success(let data):
                         do {
-                            let decodingData = try Decoder().decodingJson(data, by: D.self)
+                            let decodingData = try Decoder().decodingJson(data, by: type)
                             
                             completion(.success(decodingData))
                         } catch {

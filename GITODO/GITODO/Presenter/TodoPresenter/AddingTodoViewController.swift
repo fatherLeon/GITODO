@@ -46,7 +46,6 @@ class AddingTodoViewController: UIViewController {
         picker.translatesAutoresizingMaskIntoConstraints = false
         picker.preferredDatePickerStyle = .wheels
         picker.locale = Locale(identifier: "ko_KR")
-        picker.datePickerMode = .time
         
         return picker
     }()
@@ -240,6 +239,12 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
+        if todoObject == nil {
+            datePicker.datePickerMode = .time
+        } else {
+            datePicker.datePickerMode = .dateAndTime
+        }
+        
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([

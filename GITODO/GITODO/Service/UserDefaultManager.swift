@@ -14,20 +14,18 @@ struct UserDefaultManager {
         userDefault.setValue(dict, forKey: key)
     }
     
-    func fetch(by key: String) -> [String: Any] {
-        guard let dict = userDefault.dictionary(forKey: key) else {
-            return [:]
+    func fetch(by key: String) -> [String] {
+        guard let arr = userDefault.array(forKey: key) as? [String] else {
+            return []
         }
         
-        return dict
+        return arr
     }
     
-    func update(_ dict: [String: String], _ key: String) {
+    func update(_ arr: [String], _ key: String) {
         var data = fetch(by: key)
         
-        for (label, value) in dict {
-            data[label] = value
-        }
+        data += arr
         
         userDefault.setValue(data, forKey: key)
     }

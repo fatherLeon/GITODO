@@ -9,7 +9,7 @@ import Foundation
 
 typealias GitCommits = [GitCommit]
 
-struct GitCommit: Codable {
+struct GitCommit: Decodable {
     let commit: Commit
 
     enum CodingKeys: String, CodingKey {
@@ -17,7 +17,7 @@ struct GitCommit: Codable {
     }
 }
 
-struct Commit: Codable {
+struct Commit: Decodable {
     let author, committer: CommitAuthor
     let message: String
 
@@ -26,6 +26,6 @@ struct Commit: Codable {
     }
 }
 
-struct CommitAuthor: Codable {
+struct CommitAuthor: Decodable {
     let date: Date
 }
