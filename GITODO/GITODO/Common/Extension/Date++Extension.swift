@@ -17,7 +17,20 @@ extension Date {
         return formatter
     }()
     
+    private static let iso8601DateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        
+        formatter.dateFormat = "YYYY-MM-dd"
+        formatter.locale = Locale.current
+        
+        return formatter
+    }()
+    
     static func toString(_ date: Date) -> String {
         return Date.dateFormatter.string(from: date)
+    }
+    
+    static func toISO8601Date(_ text: String) -> Date? {
+        return iso8601DateFormatter.date(from: text)
     }
 }

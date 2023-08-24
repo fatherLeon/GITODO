@@ -127,6 +127,10 @@ final class TodoViewController: UIViewController {
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         updateTableView(by: today)
+        
+        gitManager.searchCommits(by: "fatherLeon/TIL", perPage: 100, page: 2) { commits in
+            print(commits.count)
+        }
     }
     
     @objc func clickedRightArrowBtn() {

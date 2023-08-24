@@ -18,7 +18,7 @@ enum EndPoint: Requestable {
     case repository(user: String)
     
     //https://api.github.com/repos/fatherLeon/FOFMAP/commits
-    case commits(fullName: String, perPage: Int = 30, page: Int = 1)
+    case commits(fullName: String, perPage: Int, page: Int)
     
     private var scheme: String {
         return "https"

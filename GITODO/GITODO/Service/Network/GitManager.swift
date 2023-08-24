@@ -32,8 +32,8 @@ final class GitManager {
         }
     }
     
-    func searchCommits(by fullName: String, completion: @escaping (GitCommits) -> Void) {
-        let requestable = EndPoint.commits(fullName: fullName)
+    func searchCommits(by fullName: String, perPage: Int = 30, page: Int = 1, completion: @escaping (GitCommits) -> Void) {
+        let requestable = EndPoint.commits(fullName: fullName, perPage: perPage, page: page)
         
         try? network.request(by: GitCommits.self, with: requestable, { result in
             switch result {

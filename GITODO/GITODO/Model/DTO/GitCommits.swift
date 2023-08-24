@@ -5,11 +5,6 @@
 //  Created by 강민수 on 2023/08/24.
 //
 
-// This file was generated from JSON Schema using quicktype, do not modify it directly.
-// To parse the JSON, add this file to your project and do:
-//
-//   let gitCommits = try? JSONDecoder().decode(GitCommits.self, from: jsonData)
-
 import Foundation
 
 typealias GitCommits = [GitCommit]
@@ -31,7 +26,6 @@ struct Commit: Codable {
     }
 }
 
-// MARK: - CommitAuthor
 struct CommitAuthor: Codable {
     let date: String
 }
