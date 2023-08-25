@@ -131,18 +131,13 @@ final class TodoViewController: UIViewController {
             
             gitManager.searchCommits(by: "fatherLeon/FOFMAP", perPage: 100, page: 1, since: before, until: Date()) { [weak self] commits in
                 commits.forEach { gitCommit in
-                    guard let date = Date.toISO8601Date(gitCommit.commit.author.date) else { return }
+                    guard let date = Date.toISO8601Date(gitCommit.commit.author.date),
+                          let components = date.convertDateToYearMonthDay() else { return }
                     
-                    let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
-                    
-                    guard let year = components.year,
-                          let month = components.month,
-                          let day = components.day else { return }
-                    
-                    let targetId = "\(year)-\(month)-\(day)"
+                    let targetId = "\(components.year)-\(components.month)-\(components.day)"
                     
                     guard var targetData = try? self?.coredataManager.searchOne(targetId, type: CommitByDateObject.self) as? CommitByDateObject else {
-                        try? self?.coredataManager.save(CommitByDateObject(year: year, month: month, day: day, storedDate: Date(), commitedNum: 1))
+                        try? self?.coredataManager.save(CommitByDateObject(year: components.year, month: components.month, day: components.day, storedDate: Date(), commitedNum: 1))
                         
                         return
                     }
@@ -212,13 +207,9 @@ final class TodoViewController: UIViewController {
     }
     
     private func fetchTodos(by date: Date) -> [TodoObject] {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        guard let components = date.convertDateToYearMonthDay() else { return [] }
         
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day else { return [] }
-        
-        let targetId = "\(year)-\(month)-\(day)"
+        let targetId = "\(components.year)-\(components.month)-\(components.day)"
         
         guard let todos = try? coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
             return []
@@ -429,17 +420,12 @@ extension TodoViewController {
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     func calendar(_ calendar: FSCalendar, cellFor date: Date, at position: FSCalendarMonthPosition) -> FSCalendarCell {
-        guard let cell = calendar.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: date, at: position) as? CalendarCell else {
+        guard let cell = calendar.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: date, at: position) as? CalendarCell,
+              let components = date.convertDateToYearMonthDay() else {
             return FSCalendarCell()
         }
-
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
         
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day else { return FSCalendarCell() }
-        
-        guard let count = (try? coredataManager.searchOne("\(year)-\(month)-\(day)", type: CommitByDateObject.self) as? CommitByDateObject)?.commitedNum else {
+        guard let count = (try? coredataManager.searchOne("\(components.year)-\(components.month)-\(components.day)", type: CommitByDateObject.self) as? CommitByDateObject)?.commitedNum else {
             cell.updateUI(.systemBackground)
             return cell
         }
