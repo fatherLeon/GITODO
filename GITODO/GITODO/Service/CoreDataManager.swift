@@ -79,6 +79,26 @@ final class CoreDataManager {
         }
     }
     
+    func searchOne(_ id: String, type: Interactionable.Type) throws -> Interactionable {
+        let request = type.entityType.fetchRequest()
+        let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
+        
+        request.entity = entity
+        request.predicate = NSPredicate(format: "id.length > 0 AND id == %@", id)
+        
+        do {
+            guard let results = try context.fetch(request) as? [NSManagedObject],
+                  let result = results.first,
+                  let transformedResult = type.transform(result) else {
+                throw DBError.fetchError
+            }
+            
+            return transformedResult
+        } catch {
+            throw DBError.fetchError
+        }
+    }
+    
     func search(_ storedDate: Date, type: Interactionable.Type) throws -> NSManagedObject {
         let request = type.entityType.fetchRequest()
         let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)

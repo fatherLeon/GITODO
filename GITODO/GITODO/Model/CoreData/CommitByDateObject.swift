@@ -17,7 +17,7 @@ struct CommitByDateObject: Interactionable {
     let year: Int16
     let month: Int16
     let day: Int16
-    let commitedNum: Int64
+    var commitedNum: Int64
     
     init(year: Int, month: Int, day: Int, storedDate: Date, commitedNum: Int) {
         self.id = "\(year)-\(month)-\(day)"

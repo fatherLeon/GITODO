@@ -21,7 +21,6 @@ final class TodoViewController: UIViewController {
     private var todos: [TodoObject] = []
     private let coredataManager = CoreDataManager.shared
     private let gitManager = GitManager()
-    private var commits: GitCommits = []
     private var calendarHeightAnchor: NSLayoutConstraint?
     private lazy var gesture: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self.calendarView, action: #selector(calendarView.handleScopeGesture(_:)))
@@ -125,11 +124,37 @@ final class TodoViewController: UIViewController {
         
         updateTableView(by: today)
         
-        gitManager.searchCommits(by: "fatherLeon/FOFMAP", perPage: 100, page: 1) { [weak self] commits in
-            self?.commits = commits
+        guard let commitsData = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject] ?? [] else { return }
+        
+        if commitsData.count == 0 {
+            guard let before = Date().beforeOneYear else { return }
             
-            DispatchQueue.main.async {
-                self?.calendarView.reloadData()
+            gitManager.searchCommits(by: "fatherLeon/FOFMAP", perPage: 100, page: 1, since: before, until: Date()) { [weak self] commits in
+                commits.forEach { gitCommit in
+                    guard let date = Date.toISO8601Date(gitCommit.commit.author.date) else { return }
+                    
+                    let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+                    
+                    guard let year = components.year,
+                          let month = components.month,
+                          let day = components.day else { return }
+                    
+                    let targetId = "\(year)-\(month)-\(day)"
+                    
+                    guard var targetData = try? self?.coredataManager.searchOne(targetId, type: CommitByDateObject.self) as? CommitByDateObject else {
+                        try? self?.coredataManager.save(CommitByDateObject(year: year, month: month, day: day, storedDate: Date(), commitedNum: 1))
+                        
+                        return
+                    }
+                    
+                    targetData.commitedNum += 1
+                    
+                    try? self?.coredataManager.update(storedDate: Date(), data: targetData, type: CommitByDateObject.self)
+                }
+                
+                DispatchQueue.main.async {
+                    self?.calendarView.reloadData()
+                }
             }
         }
     }
@@ -407,30 +432,23 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
         guard let cell = calendar.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: date, at: position) as? CalendarCell else {
             return FSCalendarCell()
         }
+
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
         
-        let dateCommitCount = commits.filter({ commits in
-            guard let targetedDate = Date.toISO8601Date(commits.commit.author.date) else {
-                return false
-            }
-            
-            let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
-            let targetComponents = Calendar.current.dateComponents([.year, .month, .day], from: targetedDate)
-            
-            if components.year == targetComponents.year &&
-                components.month == targetComponents.month &&
-                components.day == targetComponents.day {
-                return true
-            } else {
-                return false
-            }
-        }).count
+        guard let year = components.year,
+              let month = components.month,
+              let day = components.day else { return FSCalendarCell() }
         
-        if dateCommitCount > 0 {
+        guard let count = (try? coredataManager.searchOne("\(year)-\(month)-\(day)", type: CommitByDateObject.self) as? CommitByDateObject)?.commitedNum else {
+            cell.updateUI(.systemBackground)
+            return cell
+        }
+        
+        if count > 0 {
             cell.updateUI(CustomColor.darkGreen)
         } else {
             cell.updateUI(.systemBackground)
         }
-        
         return cell
     }
     

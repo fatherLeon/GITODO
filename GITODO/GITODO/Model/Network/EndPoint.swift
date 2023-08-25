@@ -18,7 +18,7 @@ enum EndPoint: Requestable {
     case repository(user: String)
     
     //https://api.github.com/repos/fatherLeon/FOFMAP/commits
-    case commits(fullName: String, perPage: Int, page: Int)
+    case commits(fullName: String, perPage: Int, page: Int, since: Date, until: Date)
     
     private var scheme: String {
         return "https"
@@ -32,7 +32,7 @@ enum EndPoint: Requestable {
         switch self {
         case .repository(let user):
             return "/users/\(user)/repos"
-        case .commits(let fullName, _, _):
+        case .commits(let fullName, _, _, _, _):
             return "/repos/\(fullName)/commits"
         }
     }
@@ -41,11 +41,13 @@ enum EndPoint: Requestable {
         switch self {
         case .repository(_):
             return []
-        case .commits(_, let perPage, let page):
+        case .commits(_, let perPage, let page, let since, let until):
             let perPageItem = URLQueryItem(name: "per_page", value: "\(perPage)")
             let pageItem = URLQueryItem(name: "page", value: "\(page)")
+            let sinceItem = URLQueryItem(name: "since", value: Date.toISO8601String(since))
+            let untilItem = URLQueryItem(name: "until", value: Date.toISO8601String(until))
             
-            return [perPageItem, pageItem]
+            return [perPageItem, pageItem, sinceItem, untilItem]
         }
     }
     

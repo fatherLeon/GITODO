@@ -75,7 +75,8 @@ final class CalendarCell: FSCalendarCell {
         }
         
         if isSelected || dateIsToday {
-            self.titleLabel.textColor = .systemPurple
+            self.titleLabel.font = .boldSystemFont(ofSize: 16)
+            self.titleLabel.textColor = .systemBlue
         }
     }
     
