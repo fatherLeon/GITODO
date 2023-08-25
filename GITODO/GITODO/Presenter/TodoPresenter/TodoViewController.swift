@@ -24,7 +24,7 @@ final class TodoViewController: UIViewController {
     private var commits: GitCommits = []
     private var calendarHeightAnchor: NSLayoutConstraint?
     private lazy var gesture: UIPanGestureRecognizer = {
-        let gesture = UIPanGestureRecognizer(target: self, action: #selector(panView(_:)))
+        let gesture = UIPanGestureRecognizer(target: self.calendarView, action: #selector(calendarView.handleScopeGesture(_:)))
         
         gesture.delegate = self
         gesture.minimumNumberOfTouches = 1
@@ -180,19 +180,6 @@ final class TodoViewController: UIViewController {
         presentAddingTodoVC(targetDate: selectedDate, delegate: self)
     }
     
-    @objc func panView(_ swipe: UIPanGestureRecognizer) {
-        switch calendarView.scope {
-        case .month:
-            changeWeekArrow()
-        case .week:
-            changeMonthArrow()
-        @unknown default:
-            return
-        }
-        
-        calendarView.handleScopeGesture(swipe)
-    }
-    
     private func deleteTodo(todo: TodoObject) -> Bool {
         do {
             try coredataManager.delete(storedDate: todo.storedDate, type: TodoObject.self)
@@ -217,20 +204,6 @@ final class TodoViewController: UIViewController {
         }
         
         return todos
-    }
-    
-    private func changeWeekArrow() {
-        UIView.animate(withDuration: 0.5) {
-            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi / 2)
-            self.rightArrowButton.transform = CGAffineTransform(rotationAngle: -(.pi / 2))
-        }
-    }
-    
-    private func changeMonthArrow() {
-        UIView.animate(withDuration: 0.5) {
-            self.leftArrowButton.transform = CGAffineTransform(rotationAngle: .pi)
-            self.rightArrowButton.transform = .identity
-        }
     }
     
     private func presentAddingTodoVC(todoObject: TodoObject? = nil, targetDate: Date, delegate: AddingTodoDelegate? = nil) {
@@ -383,6 +356,8 @@ extension TodoViewController {
     }
     
     private func configureCalendarView() {
+        calendarView.register(CalendarCell.self, forCellReuseIdentifier: CalendarCell.identifier)
+        
         calendarView.delegate = self
         calendarView.dataSource = self
         
@@ -432,9 +407,40 @@ extension TodoViewController {
 
 // MARK: FSCalendar delegate datasource
 extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
+    func calendar(_ calendar: FSCalendar, cellFor date: Date, at position: FSCalendarMonthPosition) -> FSCalendarCell {
+        guard let cell = calendar.dequeueReusableCell(withIdentifier: CalendarCell.identifier, for: date, at: position) as? CalendarCell else {
+            return FSCalendarCell()
+        }
+        
+        let dateCommitCount = commits.filter({ commits in
+            guard let targetedDate = Date.toISO8601Date(commits.commit.author.date) else {
+                return false
+            }
+            
+            let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+            let targetComponents = Calendar.current.dateComponents([.year, .month, .day], from: targetedDate)
+            
+            if components.year == targetComponents.year &&
+                components.month == targetComponents.month &&
+                components.day == targetComponents.day {
+                return true
+            } else {
+                return false
+            }
+        }).count
+        
+        if dateCommitCount > 0 {
+            cell.updateUI(CustomColor.darkGreen)
+        } else {
+            cell.updateUI(.systemBackground)
+        }
+        
+        return cell
+    }
+    
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate = date
-        updateTableView(by: date)
+        self.updateTableView(by: date)
     }
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
@@ -443,37 +449,23 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-        return 1
+        if fetchTodos(by: date).count > 0 {
+            return 1
+        }
+        
+        return 0
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-        let todosNum = fetchTodos(by: date).count
-        
-        if todosNum > 0 {
-            return [.systemGray2]
-        } else {
-            return [.systemBackground]
-        }
+        return [.darkGray]
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
-        let todosNum = fetchTodos(by: date).count
-        
-        if todosNum > 0 {
-            return [.systemGray2]
-        } else {
-            return [.systemBackground]
-        }
+        return [.darkGray]
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {
         self.calendarHeightAnchor?.constant = bounds.height
         self.view.layoutIfNeeded()
-        
-        if bounds.height < self.view.frame.height / 3 {
-            calendarView.scrollDirection = .horizontal
-        } else {
-            calendarView.scrollDirection = .vertical
-        }
     }
 }
