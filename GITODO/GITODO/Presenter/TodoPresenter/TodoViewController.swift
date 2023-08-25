@@ -66,10 +66,6 @@ final class TodoViewController: UIViewController {
         calendar.scope = .week
         calendar.scrollDirection = .horizontal
         calendar.locale = Locale.current
-        calendar.appearance.titleDefaultColor = .label
-        calendar.appearance.selectionColor = .red
-        calendar.appearance.todayColor = .blue
-        calendar.appearance.todaySelectionColor = .blue
         calendar.translatesAutoresizingMaskIntoConstraints = false
         
         return calendar
