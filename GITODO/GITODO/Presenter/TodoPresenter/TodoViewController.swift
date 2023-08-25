@@ -120,7 +120,7 @@ final class TodoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureUI()
+        configureView()
         configureGesture()
         
         leftArrowButton.addTarget(self, action: #selector(clickedLeftArrowBtn), for: .touchUpInside)
@@ -129,7 +129,7 @@ final class TodoViewController: UIViewController {
         
         updateTableView(by: today)
         
-        gitManager.searchCommits(by: "fatherLeon/TIL", perPage: 100, page: 1) { [weak self] commits in
+        gitManager.searchCommits(by: "fatherLeon/FOFMAP", perPage: 100, page: 1) { [weak self] commits in
             self?.commits = commits
             
             DispatchQueue.main.async {
@@ -302,7 +302,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 
 // MARK: Init Configuration
 extension TodoViewController {
-    private func configureUI() {
+    private func configureView() {
         view.backgroundColor = .systemBackground
         
         configureNavigationHeaderView()
