@@ -126,32 +126,43 @@ final class TodoViewController: UIViewController {
         
         guard let commitsData = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject] ?? [] else { return }
         
-        if commitsData.count == 0 {
-            guard let before = Date().beforeOneYear else { return }
+        guard let before = Date().beforeOneYear else { return }
+        
+        gitManager.searchCommits(by: "fatherLeon/TIL", perPage: 100, page: 1, since: before, until: Date()) { [weak self] commits in
+            commits.forEach { gitCommit in
+                self?.processCommit(gitCommit)
+            }
             
-            gitManager.searchCommits(by: "fatherLeon/FOFMAP", perPage: 100, page: 1, since: before, until: Date()) { [weak self] commits in
-                commits.forEach { gitCommit in
-                    guard let date = Date.toISO8601Date(gitCommit.commit.author.date),
-                          let components = date.convertDateToYearMonthDay() else { return }
-                    
-                    let targetId = "\(components.year)-\(components.month)-\(components.day)"
-                    
-                    guard var targetData = try? self?.coredataManager.searchOne(targetId, type: CommitByDateObject.self) as? CommitByDateObject else {
-                        try? self?.coredataManager.save(CommitByDateObject(year: components.year, month: components.month, day: components.day, storedDate: Date(), commitedNum: 1))
-                        
-                        return
-                    }
-                    
-                    targetData.commitedNum += 1
-                    
-                    try? self?.coredataManager.update(storedDate: Date(), data: targetData, type: CommitByDateObject.self)
-                }
-                
-                DispatchQueue.main.async {
-                    self?.calendarView.reloadData()
-                }
+            DispatchQueue.main.async {
+                self?.calendarView.reloadData()
             }
         }
+    }
+    
+    private func processCommit(_ gitCommit: GitCommit) {
+        guard let date = Date.toISO8601Date(gitCommit.commit.author.date),
+              let components = date.convertDateToYearMonthDay() else { return }
+        
+        let targetId = "\(components.year)-\(components.month)-\(components.day)"
+        
+        guard var target = try? coredataManager.searchOne(targetId, type: CommitByDateObject.self) as? CommitByDateObject else {
+            saveCommit(year: components.year, month: components.month, day: components.day)
+            return
+        }
+        
+        target.commitedNum += 1
+        
+        updateCommit(target)
+    }
+    
+    private func saveCommit(year: Int, month: Int, day: Int) {
+        let object = CommitByDateObject(year: year, month: month, day: day, storedDate: Date(), commitedNum: 1)
+        
+        try? coredataManager.save(object)
+    }
+    
+    private func updateCommit(_ target: CommitByDateObject) {
+        try? coredataManager.update(storedDate: Date(), data: target, type: CommitByDateObject.self)
     }
     
     @objc func clickedRightArrowBtn() {
@@ -204,6 +215,10 @@ final class TodoViewController: UIViewController {
             showAlert(title: "삭제 실패", message: nil)
             return false
         }
+    }
+    
+    private func updateTodo(_ data: TodoObject) {
+        try? coredataManager.update(storedDate: data.storedDate, data: data, type: TodoObject.self)
     }
     
     private func fetchTodos(by date: Date) -> [TodoObject] {
@@ -269,11 +284,11 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell,
-              let title = todos[safe: indexPath.row]?.title else {
+              let todo = todos[safe: indexPath.row] else {
             return UITableViewCell()
         }
         
-        cell.updateTitle(title)
+        cell.updateCell(todo.title, todo.isComplete)
         cell.accessoryType = .disclosureIndicator
         
         return cell
@@ -289,7 +304,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let todo = todos[indexPath.row]
+        var todo = todos[indexPath.row]
         let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
             let result = self?.deleteTodo(todo: todo) ?? true
             
@@ -301,10 +316,34 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
             }
         }
         
-        deleteAction.backgroundColor = .red
-        deleteAction.image = UIImage(systemName: "trash.fill")
+        let completeAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
+            todo.isComplete = true
+            self?.updateTodo(todo)
+            self?.updateTableView(by: todo.storedDate)
+            
+            completion(true)
+        }
         
-        return UISwipeActionsConfiguration(actions: [deleteAction])
+        let noCompleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
+            todo.isComplete = false
+            self?.updateTodo(todo)
+            self?.updateTableView(by: todo.storedDate)
+            
+            completion(true)
+        }
+        
+        deleteAction.backgroundColor = .systemRed
+        deleteAction.image = UIImage(systemName: "trash.fill")
+        completeAction.backgroundColor = .systemBlue
+        completeAction.image = UIImage(systemName: "checkmark.circle.fill")
+        noCompleteAction.backgroundColor = .systemGray2
+        noCompleteAction.image = UIImage(systemName: "xmark.circle.fill")
+        
+        if todo.isComplete {
+            return UISwipeActionsConfiguration(actions: [deleteAction, noCompleteAction])
+        } else {
+            return UISwipeActionsConfiguration(actions: [deleteAction, completeAction])
+        }
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -438,6 +477,11 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
         return cell
     }
     
+    func calendar(_ calendar: FSCalendar, willDisplay cell: FSCalendarCell, for date: Date, at monthPosition: FSCalendarMonthPosition) {
+        let scaleFactor: CGFloat = 1.5
+        cell.eventIndicator.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+    }
+    
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         self.selectedDate = date
         self.updateTableView(by: date)
@@ -457,11 +501,11 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-        return [.darkGray]
+        return [.systemRed]
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
-        return [.darkGray]
+        return [.systemRed]
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {

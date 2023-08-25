@@ -35,10 +35,12 @@ final class TodoCell: UITableViewCell {
         super.prepareForReuse()
         
         self.titleLabel.text = ""
+        self.titleLabel.textColor = .label
     }
     
-    func updateTitle(_ title: String) {
+    func updateCell(_ title: String, _ isComplete: Bool) {
         titleLabel.text = title
+        titleLabel.textColor = isComplete ? .secondaryLabel : .label
     }
 }
 

@@ -19,11 +19,12 @@ struct TodoObject: Interactionable {
     let day: Int16
     let hour: Int16
     let minute: Int16
-    var second: Int16
+    let second: Int16
     let title: String
     let memo: String
+    var isComplete: Bool
     
-    init(year: Int16, month: Int16, day: Int16, hour: Int16, minute: Int16, second: Int16, title: String, memo: String, storedDate: Date) {
+    init(year: Int16, month: Int16, day: Int16, hour: Int16, minute: Int16, second: Int16, title: String, memo: String, storedDate: Date, isComplete: Bool) {
         self.year = year
         self.month = month
         self.day = day
@@ -34,6 +35,7 @@ struct TodoObject: Interactionable {
         self.title = title
         self.memo = memo
         self.storedDate = storedDate
+        self.isComplete = isComplete
     }
     
     func transform() -> NSManagedObject {
@@ -53,6 +55,6 @@ struct TodoObject: Interactionable {
               let memo = data.memo,
               let storedDate = data.storedDate else { return nil }
         
-        return TodoObject(year: data.year, month: data.month, day: data.day, hour: data.hour, minute: data.minute, second: data.second, title: title, memo: memo, storedDate: storedDate)
+        return TodoObject(year: data.year, month: data.month, day: data.day, hour: data.hour, minute: data.minute, second: data.second, title: title, memo: memo, storedDate: storedDate, isComplete: data.isComplete)
     }
 }
