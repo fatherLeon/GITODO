@@ -7,7 +7,7 @@
 
 import UIKit
 
-class LicenceViewController: UIViewController {
+final class LicenceViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

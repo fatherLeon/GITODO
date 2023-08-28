@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ThemeViewController: UIViewController {
+final class ThemeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

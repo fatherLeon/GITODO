@@ -7,7 +7,7 @@
 
 import UIKit
 
-class AddingTodoViewController: UIViewController {
+final class AddingTodoViewController: UIViewController {
     
     private let targetDate: Date
     private let todoObject: TodoObject?
