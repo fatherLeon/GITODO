@@ -22,12 +22,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabbarController = UITabBarController()
         
         let todoPresenter = UINavigationController(rootViewController: TodoViewController())
-        let settingPresenter = UINavigationController(rootViewController: SettingViewController())
+        let configPresenter = UINavigationController(rootViewController: ConfigViewController())
         
         todoPresenter.tabBarItem.image = UIImage(systemName: "calendar")
-        settingPresenter.tabBarItem.image = UIImage(systemName: "gearshape.fill")
+        configPresenter.tabBarItem.image = UIImage(systemName: "gearshape.fill")
         
-        tabbarController.viewControllers = [todoPresenter, settingPresenter]
+        tabbarController.viewControllers = [todoPresenter, configPresenter]
         
         window.rootViewController = tabbarController
         window.makeKeyAndVisible()
