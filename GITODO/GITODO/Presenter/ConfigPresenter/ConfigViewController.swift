@@ -8,13 +8,19 @@
 import UIKit
 
 final class ConfigViewController: UIViewController {
-    private enum ConfigContent: Int {
+    private enum ConfigContent: Int, CaseIterable {
         case githubRepository
+        case theme
+        case licence
         
         var title: String {
             switch self {
             case .githubRepository:
                 return "깃허브 레포지토리"
+            case .theme:
+                return "테마"
+            case .licence:
+                return "라이센스"
             }
         }
     }
@@ -37,7 +43,7 @@ final class ConfigViewController: UIViewController {
 // MARK: TableView Delegate, Datasource
 extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return ConfigContent.allCases.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -47,6 +53,7 @@ extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         cell.updateCell(title, false)
+        cell.accessoryType = .disclosureIndicator
         
         return cell
     }
@@ -57,7 +64,13 @@ extension ConfigViewController {
     private func configureView() {
         self.view.backgroundColor = .systemBackground
         
+        configureNavigationView()
         configureTableView()
+    }
+    
+    private func configureNavigationView() {
+        self.navigationController?.navigationBar.prefersLargeTitles = true
+        self.navigationItem.title = "설정"
     }
     
     private func configureTableView() {

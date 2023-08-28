@@ -393,7 +393,7 @@ extension TodoViewController {
         rightArrowButton.animation = arrowAnimation
         calendarButton.animation = calendarAnimation
         
-        view.addSubview(calendarHeaderStackView)
+        self.view.addSubview(calendarHeaderStackView)
         
         NSLayoutConstraint.activate([
             leftArrowButton.widthAnchor.constraint(equalTo: calendarHeaderStackView.widthAnchor, multiplier: 0.1),
@@ -412,11 +412,10 @@ extension TodoViewController {
     
     private func configureCalendarView() {
         calendarView.register(CalendarCell.self, forCellReuseIdentifier: CalendarCell.identifier)
-        
         calendarView.delegate = self
         calendarView.dataSource = self
         
-        view.addSubview(calendarView)
+        self.view.addSubview(calendarView)
         
         NSLayoutConstraint.activate([
             calendarView.topAnchor.constraint(equalTo: calendarHeaderStackView.bottomAnchor),
