@@ -23,6 +23,17 @@ final class ConfigViewController: UIViewController {
                 return "라이센스"
             }
         }
+        
+        var viewController: UIViewController {
+            switch self {
+            case .githubRepository:
+                return SearchRepoViewController()
+            case .theme:
+                return ThemeViewController()
+            case .licence:
+                return LicenceViewController()
+            }
+        }
     }
     
     private let tableView: UITableView = {
@@ -56,6 +67,14 @@ extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
         cell.accessoryType = .disclosureIndicator
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        guard let viewController = ConfigContent(rawValue: indexPath.row)?.viewController else { return }
+        
+        self.present(viewController, animated: true)
     }
 }
 
