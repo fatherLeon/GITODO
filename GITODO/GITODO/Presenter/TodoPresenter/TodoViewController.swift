@@ -248,6 +248,10 @@ extension TodoViewController: AddingTodoDelegate {
         self.todos = todos
         self.tableView.reloadData()
         self.calendarView.reloadData()
+        
+        self.selectedDate = date
+        self.calendarView.select(date)
+        self.calendarView.setCurrentPage(date, animated: true)
     }
 }
 
