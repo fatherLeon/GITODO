@@ -8,8 +8,10 @@
 import UIKit
 
 final class SearchRepoViewController: UIViewController {
-        
+    
     private let gitManager = GitManager()
+    private let userDefaultManager = UserDefaultManager()
+    private var repoFullNames: [String] = []
     private var repos: GitRepositories = []
     private var page: Int = 1
     private var isFetchedRepo = true
@@ -59,6 +61,14 @@ final class SearchRepoViewController: UIViewController {
         super.viewDidLoad()
         
         configureView()
+        
+        self.repoFullNames = userDefaultManager.fetch(by: UserDefaultManager.key)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        userDefaultManager.save(self.repoFullNames, UserDefaultManager.key)
     }
     
     private func searchRepository(text: String, perPage: Int = 30, errorMessage: String?) {
@@ -127,14 +137,32 @@ extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: RepoCell.identifier) as? RepoCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: RepoCell.identifier) as? RepoCell,
+              let repo = repos[safe: indexPath.row] else {
             return UITableViewCell()
         }
         
-        let repo = repos[indexPath.row]
         cell.updateCell(repo)
         
+        if self.repoFullNames.contains(repo.fullName) {
+            cell.accessoryType = .checkmark
+        } else {
+            cell.accessoryType = .none
+        }
+        
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let repo = repos[safe: indexPath.row] else { return }
+        
+        if self.repoFullNames.contains(repo.fullName) {
+            self.repoFullNames.removeAll { $0 == repo.fullName }
+        } else {
+            self.repoFullNames.append(repo.fullName)
+        }
+        
+        tableView.reloadRows(at: [indexPath], with: .automatic)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
