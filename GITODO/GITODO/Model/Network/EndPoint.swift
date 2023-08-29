@@ -15,7 +15,7 @@ protocol Requestable {
 
 enum EndPoint: Requestable {
     //https://api.github.com/users/fatherLeon/repos
-    case repository(user: String)
+    case repository(user: String, sort: String = "created", perPage: Int, page: Int)
     
     //https://api.github.com/repos/fatherLeon/FOFMAP/commits
     case commits(fullName: String, perPage: Int, page: Int, since: Date, until: Date)
@@ -30,7 +30,7 @@ enum EndPoint: Requestable {
     
     private var path: String {
         switch self {
-        case .repository(let user):
+        case .repository(let user, _, _, _):
             return "/users/\(user)/repos"
         case .commits(let fullName, _, _, _, _):
             return "/repos/\(fullName)/commits"
@@ -39,8 +39,12 @@ enum EndPoint: Requestable {
     
     private var querys: [URLQueryItem] {
         switch self {
-        case .repository(_):
-            return []
+        case .repository(_, let sort, let perPage, let page):
+            let sortItem = URLQueryItem(name: "sort", value: sort)
+            let perPageItem = URLQueryItem(name: "per_page", value: "\(perPage)")
+            let pageItem = URLQueryItem(name: "page", value: "\(page)")
+            
+            return [sortItem, perPageItem, pageItem]
         case .commits(_, let perPage, let page, let since, let until):
             let perPageItem = URLQueryItem(name: "per_page", value: "\(perPage)")
             let pageItem = URLQueryItem(name: "page", value: "\(page)")

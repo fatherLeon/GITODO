@@ -9,14 +9,32 @@ import Foundation
 
 typealias GitRepositories = [GitRepository]
 
-struct GitRepository: Decodable {
-    let id: Int
-    let nodeID, name, fullName: String
+// MARK: - GitRepository
+struct GitRepository: Codable {
+    let name, fullName: String
+    let owner: Owner
+    let description: String?
+    let createdAt, updatedAt: String
+    let language: String?
 
     enum CodingKeys: String, CodingKey {
-        case id
-        case nodeID = "node_id"
         case name
         case fullName = "full_name"
+        case owner
+        case description
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case language
+    }
+}
+
+// MARK: - Owner
+struct Owner: Codable {
+    let avatarURL: String
+    let gravatarID: String
+
+    enum CodingKeys: String, CodingKey {
+        case avatarURL = "avatar_url"
+        case gravatarID = "gravatar_id"
     }
 }

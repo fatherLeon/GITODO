@@ -8,6 +8,9 @@
 import UIKit
 
 final class SearchRepoViewController: UIViewController {
+        
+    private let gitManager = GitManager()
+    private var repos: GitRepositories = []
     
     private let textField: UITextField = {
         let textField = UITextField()
@@ -48,17 +51,33 @@ final class SearchRepoViewController: UIViewController {
     }
     
     @objc private func clickedSearchButton() {
+        guard let text = textField.text else { return }
         
+        gitManager.searchRepos(by: text, perPage: 30, page: 1) { [weak self] repos in
+            self?.repos = repos
+            
+            DispatchQueue.main.async {
+                self?.view.endEditing(true)
+                self?.tableView.reloadData()
+            }
+        }
     }
 }
 
 extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return repos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: RepoCell.identifier) as? RepoCell else {
+            return UITableViewCell()
+        }
+        
+        let repo = repos[indexPath.row]
+        cell.updateCell(repo)
+        
+        return cell
     }
 }
 
@@ -108,6 +127,7 @@ extension SearchRepoViewController {
     }
     
     private func configureTableView() {
+        tableView.register(RepoCell.self, forCellReuseIdentifier: RepoCell.identifier)
         self.view.addSubview(tableView)
         
         tableView.delegate = self

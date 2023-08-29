@@ -309,6 +309,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         var todo = todos[indexPath.row]
+        let selectedDate = self.selectedDate
         let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
             let result = self?.deleteTodo(todo: todo) ?? true
             
@@ -323,7 +324,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
         let completeAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
             todo.isComplete = true
             self?.updateTodo(todo)
-            self?.updateTableView(by: todo.storedDate)
+            self?.updateTableView(by: selectedDate)
             
             completion(true)
         }
@@ -331,7 +332,7 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
         let noCompleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
             todo.isComplete = false
             self?.updateTodo(todo)
-            self?.updateTableView(by: todo.storedDate)
+            self?.updateTableView(by: selectedDate)
             
             completion(true)
         }
@@ -504,11 +505,19 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-        return [.systemRed]
+        if fetchTodos(by: date).allSatisfy({ $0.isComplete == true }) {
+            return [.systemGray]
+        } else {
+            return [.systemRed]
+        }
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
-        return [.systemRed]
+        if fetchTodos(by: date).allSatisfy({ $0.isComplete == true }) {
+            return [.systemGray]
+        } else {
+            return [.systemRed]
+        }
     }
     
     func calendar(_ calendar: FSCalendar, boundingRectWillChange bounds: CGRect, animated: Bool) {

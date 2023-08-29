@@ -14,8 +14,8 @@ final class GitManager {
         self.network = NetworkProvider(session: session)
     }
     
-    func searchRepos(by nickname: String, completion: @escaping (GitRepositories) -> Void) {
-        let requestable = EndPoint.repository(user: nickname)
+    func searchRepos(by nickname: String, perPage: Int, page: Int, completion: @escaping (GitRepositories) -> Void) {
+        let requestable = EndPoint.repository(user: nickname, perPage: perPage, page: page)
         
         try? network.request(by: GitRepositories.self, with: requestable) { result in
             switch result {
