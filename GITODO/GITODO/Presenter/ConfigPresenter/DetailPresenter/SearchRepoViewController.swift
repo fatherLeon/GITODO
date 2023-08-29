@@ -110,8 +110,17 @@ final class SearchRepoViewController: UIViewController {
         startIndicatorView()
         searchRepository(text: text, errorMessage: "닉네임을 확인해주세요.")
     }
+    
+    @objc private func didChangeTextInTextField() {
+        self.page = 1
+        self.isFetchedRepo = true
+        self.repos = []
+        
+        tableView.reloadData()
+    }
 }
 
+// MARK: UITableView Delegate, DataSource
 extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return repos.count
@@ -149,6 +158,7 @@ extension SearchRepoViewController {
     }
     
     private func configureTextField() {
+        textField.addTarget(self, action: #selector(didChangeTextInTextField), for: .editingChanged)
         textField.layer.cornerRadius = 10
         textField.layer.borderWidth = 0.25
         textField.layer.borderColor = UIColor.gray.cgColor
