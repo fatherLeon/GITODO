@@ -12,6 +12,7 @@ final class SearchRepoViewController: UIViewController {
     private let gitManager = GitManager()
     private var repos: GitRepositories = []
     private var page: Int = 1
+    private var isFetchedRepo = true
     
     private let textField: UITextField = {
         let textField = UITextField()
@@ -60,7 +61,7 @@ final class SearchRepoViewController: UIViewController {
         configureView()
     }
     
-    private func searchRepository(text: String, perPage: Int = 30) {
+    private func searchRepository(text: String, perPage: Int = 30, errorMessage: String?) {
         /*
          Input - text : 유저 닉네임, perPage: 페이지 당 받아올 데이터, page: 페이지 넘버
          output - Void
@@ -70,8 +71,9 @@ final class SearchRepoViewController: UIViewController {
         gitManager.searchRepos(by: text, perPage: perPage, page: self.page) { [weak self] repos in
             if repos.isEmpty {
                 DispatchQueue.main.async {
-                    self?.showAlert(title: "레포지토리가 존재하지 않습니다.", message: "닉네임을 확인해주세요.")
+                    self?.showAlert(title: "레포지토리가 존재하지 않습니다.", message: errorMessage)
                     self?.stopIndicatorView()
+                    self?.isFetchedRepo = false
                 }
                 return
             }
@@ -106,7 +108,7 @@ final class SearchRepoViewController: UIViewController {
         guard let text = textField.text else { return }
         
         startIndicatorView()
-        searchRepository(text: text)
+        searchRepository(text: text, errorMessage: "닉네임을 확인해주세요.")
     }
 }
 
@@ -124,6 +126,13 @@ extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
         cell.updateCell(repo)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == self.repos.count - 1 && isFetchedRepo {
+            guard let text = textField.text else { return }
+            searchRepository(text: text, errorMessage: "더 이상의 레포지토리가 존재하지 않습니다.")
+        }
     }
 }
 
