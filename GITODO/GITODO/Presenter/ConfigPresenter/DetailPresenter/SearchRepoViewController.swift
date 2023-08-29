@@ -43,6 +43,15 @@ final class SearchRepoViewController: UIViewController {
         return tableView
     }()
     
+    private let indicatorView: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView()
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isHidden = true
+        
+        return view
+    }()
+    
     private let searchStackView = UIStackView()
 
     override func viewDidLoad() {
@@ -51,16 +60,19 @@ final class SearchRepoViewController: UIViewController {
         configureView()
     }
     
-    private func searchRepository(text: String, perPage: Int = 30, page: Int = 1) {
+    private func searchRepository(text: String, perPage: Int = 30) {
         /*
          Input - text : 유저 닉네임, perPage: 페이지 당 받아올 데이터, page: 페이지 넘버
          output - Void
          기능 - 레포지토리 검색하여 `self.repos`에 추가 및 테이블 뷰 reload
          */
         
-        gitManager.searchRepos(by: text, perPage: perPage, page: page) { [weak self] repos in
+        gitManager.searchRepos(by: text, perPage: perPage, page: self.page) { [weak self] repos in
             if repos.isEmpty {
-                self?.showAlert(title: "레포지토리가 존재하지 않습니다.", message: "닉네임을 확인해주세요.")
+                DispatchQueue.main.async {
+                    self?.showAlert(title: "레포지토리가 존재하지 않습니다.", message: "닉네임을 확인해주세요.")
+                    self?.stopIndicatorView()
+                }
                 return
             }
             
@@ -68,15 +80,33 @@ final class SearchRepoViewController: UIViewController {
             self?.page += 1
             DispatchQueue.main.async {
                 self?.view.endEditing(true)
+                self?.stopIndicatorView()
                 self?.tableView.reloadData()
             }
         }
     }
     
+    private func startIndicatorView() {
+        /*
+         기능 - IndicatorView 보여주기, 애니메이션 시작
+         */
+        indicatorView.isHidden = false
+        indicatorView.startAnimating()
+    }
+    
+    private func stopIndicatorView() {
+        /*
+         기능 - IndicatorView 숨기기, 애니메이션 정지
+         */
+        indicatorView.stopAnimating()
+        indicatorView.isHidden = true
+    }
+    
     @objc private func clickedSearchButton() {
         guard let text = textField.text else { return }
         
-        searchRepository(text: text, page: page)
+        startIndicatorView()
+        searchRepository(text: text)
     }
 }
 
@@ -106,6 +136,7 @@ extension SearchRepoViewController {
         configureSearchButton()
         configureSearchStackView()
         configureTableView()
+        configureIndicatorView()
     }
     
     private func configureTextField() {
@@ -154,6 +185,15 @@ extension SearchRepoViewController {
             tableView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor)
+        ])
+    }
+    
+    private func configureIndicatorView() {
+        self.view.addSubview(indicatorView)
+        
+        NSLayoutConstraint.activate([
+            indicatorView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            indicatorView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
         ])
     }
 }
