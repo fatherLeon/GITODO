@@ -11,6 +11,7 @@ final class SearchRepoViewController: UIViewController {
         
     private let gitManager = GitManager()
     private var repos: GitRepositories = []
+    private var page: Int = 1
     
     private let textField: UITextField = {
         let textField = UITextField()
@@ -50,17 +51,32 @@ final class SearchRepoViewController: UIViewController {
         configureView()
     }
     
-    @objc private func clickedSearchButton() {
-        guard let text = textField.text else { return }
+    private func searchRepository(text: String, perPage: Int = 30, page: Int = 1) {
+        /*
+         Input - text : 유저 닉네임, perPage: 페이지 당 받아올 데이터, page: 페이지 넘버
+         output - Void
+         기능 - 레포지토리 검색하여 `self.repos`에 추가 및 테이블 뷰 reload
+         */
         
-        gitManager.searchRepos(by: text, perPage: 30, page: 1) { [weak self] repos in
-            self?.repos = repos
+        gitManager.searchRepos(by: text, perPage: perPage, page: page) { [weak self] repos in
+            if repos.isEmpty {
+                self?.showAlert(title: "레포지토리가 존재하지 않습니다.", message: "닉네임을 확인해주세요.")
+                return
+            }
             
+            self?.repos += repos
+            self?.page += 1
             DispatchQueue.main.async {
                 self?.view.endEditing(true)
                 self?.tableView.reloadData()
             }
         }
+    }
+    
+    @objc private func clickedSearchButton() {
+        guard let text = textField.text else { return }
+        
+        searchRepository(text: text, page: page)
     }
 }
 
