@@ -19,6 +19,7 @@ final class TodoViewController: UIViewController {
     private var selectedDate = Date()
     private var currentPage: Date?
     private var todos: [TodoObject] = []
+    private var repos: [String: Date?] = [:]
     private let coredataManager = CoreDataManager.shared
     private let gitManager = GitManager()
     private let userDefaultManager = UserDefaultManager()
@@ -125,11 +126,12 @@ final class TodoViewController: UIViewController {
         
         updateTableView(by: today)
         
-        let repos = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
-        guard let lastSavedDate = userDefaultManager.fetchDate(by: UserDefaultManager.lastSavedDateKey) ?? Date().beforeOneYear else { return }
+        self.repos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
         
-        repos.forEach { fullName in
-            fetchCommits(repoFullName: fullName, page: 1, since: lastSavedDate, until: Date())
+        self.repos.forEach { (repoFullName, lastSavedDate) in
+            guard let savedDate = lastSavedDate ?? Date().beforeOneYear else { return }
+            
+            fetchCommits(repoFullName: repoFullName, page: 1, since: savedDate, until: Date())
         }
     }
     
@@ -142,7 +144,9 @@ final class TodoViewController: UIViewController {
             if gitCommits.count % perPage == 0 {
                 self?.fetchCommits(repoFullName: repoFullName, perPage: perPage, page: page + 1, since: since, until: until)
             } else {
-                self?.userDefaultManager.save(Date(), UserDefaultManager.lastSavedDateKey)
+                self?.repos[repoFullName] = Date()
+                
+                self?.userDefaultManager.save(self?.repos ?? [:], UserDefaultManager.repositoryKey)
             }
         }
     }

@@ -11,7 +11,7 @@ final class SearchRepoViewController: UIViewController {
     
     private let gitManager = GitManager()
     private let userDefaultManager = UserDefaultManager()
-    private var repoFullNames: [String] = []
+    private var repoFullNames: [String: Date?] = [:]
     private var repos: GitRepositories = []
     private var page: Int = 1
     private var isFetchedRepo = true
@@ -62,21 +62,17 @@ final class SearchRepoViewController: UIViewController {
         
         configureView()
         
-        self.repoFullNames = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
+        self.repoFullNames = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        let beforeRepos = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
+        let beforeRepos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
         
-        if beforeRepos == repoFullNames { return }
+        if beforeRepos.keys == repoFullNames.keys { return }
         
         userDefaultManager.save(self.repoFullNames, UserDefaultManager.repositoryKey)
-        
-        guard let beforeOneYear = Date().beforeOneYear else { return }
-        
-        userDefaultManager.save(beforeOneYear, UserDefaultManager.lastSavedDateKey)
     }
     
     private func searchRepository(text: String, perPage: Int = 30, errorMessage: String?) {
@@ -152,7 +148,7 @@ extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.updateCell(repo)
         
-        if self.repoFullNames.contains(repo.fullName) {
+        if self.repoFullNames.keys.contains(repo.fullName) {
             cell.accessoryType = .checkmark
         } else {
             cell.accessoryType = .none
@@ -164,10 +160,10 @@ extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let repo = repos[safe: indexPath.row] else { return }
         
-        if self.repoFullNames.contains(repo.fullName) {
-            self.repoFullNames.removeAll { $0 == repo.fullName }
+        if self.repoFullNames.keys.contains(repo.fullName) {
+            self.repoFullNames.removeValue(forKey: repo.fullName)
         } else {
-            self.repoFullNames.append(repo.fullName)
+            self.repoFullNames[repo.fullName] = nil
         }
         
         tableView.reloadRows(at: [indexPath], with: .automatic)
