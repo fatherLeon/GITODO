@@ -62,13 +62,21 @@ final class SearchRepoViewController: UIViewController {
         
         configureView()
         
-        self.repoFullNames = userDefaultManager.fetch(by: UserDefaultManager.key)
+        self.repoFullNames = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        userDefaultManager.save(self.repoFullNames, UserDefaultManager.key)
+        let beforeRepos = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
+        
+        if beforeRepos == repoFullNames { return }
+        
+        userDefaultManager.save(self.repoFullNames, UserDefaultManager.repositoryKey)
+        
+        guard let beforeOneYear = Date().beforeOneYear else { return }
+        
+        userDefaultManager.save(beforeOneYear, UserDefaultManager.lastSavedDateKey)
     }
     
     private func searchRepository(text: String, perPage: Int = 30, errorMessage: String?) {

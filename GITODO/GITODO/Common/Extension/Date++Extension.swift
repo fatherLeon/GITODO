@@ -37,6 +37,12 @@ extension Date {
         return before
     }
     
+    var yesterDay: Date? {
+        let before = Calendar.current.date(byAdding: .day, value: -1, to: self)
+        
+        return before
+    }
+    
     func convertDateToYearMonthDay() -> (year: Int, month: Int, day: Int)? {
         let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
         

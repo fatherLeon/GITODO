@@ -8,7 +8,8 @@
 import Foundation
 
 struct UserDefaultManager {
-    static let key = "GitFullName"
+    static let repositoryKey = "GitFullName"
+    static let lastSavedDateKey = "LastSavedDate"
     
     private let userDefault = UserDefaults.standard
     
@@ -16,12 +17,24 @@ struct UserDefaultManager {
         userDefault.setValue(arr, forKey: key)
     }
     
-    func fetch(by key: String) -> [String] {
+    func save(_ date: Date, _ key: String) {
+        userDefault.setValue(date, forKey: key)
+    }
+    
+    func fetchRepos(by key: String) -> [String] {
         guard let arr = userDefault.array(forKey: key) as? [String] else {
             return []
         }
         
         return arr
+    }
+    
+    func fetchDate(by key: String) -> Date? {
+        guard let date = userDefault.object(forKey: key) as? Date else {
+            return nil
+        }
+        
+        return date
     }
     
     func delete(by key: String) {

@@ -21,6 +21,7 @@ final class TodoViewController: UIViewController {
     private var todos: [TodoObject] = []
     private let coredataManager = CoreDataManager.shared
     private let gitManager = GitManager()
+    private let userDefaultManager = UserDefaultManager()
     private var calendarHeightAnchor: NSLayoutConstraint?
     private lazy var gesture: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self.calendarView, action: #selector(calendarView.handleScopeGesture(_:)))
@@ -123,20 +124,6 @@ final class TodoViewController: UIViewController {
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         updateTableView(by: today)
-        
-        guard let commitsData = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject] ?? [] else { return }
-        
-        guard let before = Date().beforeOneYear else { return }
-        
-        gitManager.searchCommits(by: "fatherLeon/TIL", perPage: 100, page: 1, since: before, until: Date()) { [weak self] commits in
-            commits.forEach { gitCommit in
-                self?.processCommit(gitCommit)
-            }
-            
-            DispatchQueue.main.async {
-                self?.calendarView.reloadData()
-            }
-        }
     }
     
     private func processCommit(_ gitCommit: GitCommit) {
@@ -162,7 +149,7 @@ final class TodoViewController: UIViewController {
     }
     
     private func updateCommit(_ target: CommitByDateObject) {
-        try? coredataManager.update(storedDate: Date(), data: target, type: CommitByDateObject.self)
+        try? coredataManager.update(storedDate: target.storedDate, data: target, type: CommitByDateObject.self)
     }
     
     @objc func clickedRightArrowBtn() {
