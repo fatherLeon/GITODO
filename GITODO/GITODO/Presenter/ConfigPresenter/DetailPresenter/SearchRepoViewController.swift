@@ -11,7 +11,7 @@ final class SearchRepoViewController: UIViewController {
     
     private let gitManager = GitManager()
     private let userDefaultManager = UserDefaultManager()
-    private var repoFullNames: [String: Date?] = [:]
+    private var repoFullNames: [String: Date] = [:]
     private var repos: GitRepositories = []
     private var page: Int = 1
     private var isFetchedRepo = true
@@ -63,6 +63,7 @@ final class SearchRepoViewController: UIViewController {
         configureView()
         
         self.repoFullNames = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -163,7 +164,8 @@ extension SearchRepoViewController: UITableViewDelegate, UITableViewDataSource {
         if self.repoFullNames.keys.contains(repo.fullName) {
             self.repoFullNames.removeValue(forKey: repo.fullName)
         } else {
-            self.repoFullNames[repo.fullName] = nil
+            guard let date = Date().beforeOneYear else { return }
+            self.repoFullNames.updateValue(date, forKey: repo.fullName)
         }
         
         tableView.reloadRows(at: [indexPath], with: .automatic)

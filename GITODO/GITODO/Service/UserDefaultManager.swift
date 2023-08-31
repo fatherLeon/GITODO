@@ -12,12 +12,12 @@ struct UserDefaultManager {
     
     private let userDefault = UserDefaults.standard
     
-    func save(_ dict: [String: Date?], _ key: String) {
+    func save(_ dict: [String: Date], _ key: String) {
         userDefault.setValue(dict, forKey: key)
     }
     
-    func fetch(by key: String) -> [String: Date?] {
-        guard let dict = userDefault.object(forKey: key) as? [String: Date?] else {
+    func fetch(by key: String) -> [String: Date] {
+        guard let dict = userDefault.object(forKey: key) as? [String: Date] else {
             return [:]
         }
         

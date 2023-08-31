@@ -19,7 +19,7 @@ final class TodoViewController: UIViewController {
     private var selectedDate = Date()
     private var currentPage: Date?
     private var todos: [TodoObject] = []
-    private var repos: [String: Date?] = [:]
+    private var repos: [String: Date] = [:]
     private let coredataManager = CoreDataManager.shared
     private let gitManager = GitManager()
     private let userDefaultManager = UserDefaultManager()
@@ -125,28 +125,51 @@ final class TodoViewController: UIViewController {
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         updateTableView(by: today)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        self.repos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
+        let repos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
         
-        self.repos.forEach { (repoFullName, lastSavedDate) in
-            guard let savedDate = lastSavedDate ?? Date().beforeOneYear else { return }
-            
-            fetchCommits(repoFullName: repoFullName, page: 1, since: savedDate, until: Date())
+        if self.repos == repos {
+            return
+        } else {
+            self.repos = repos
+            updateCommitsInCalendar(repos: repos)
+        }
+    }
+    
+    private func updateCommitsInCalendar(repos: [String: Date]) {
+        repos.forEach { (repoFullName, lastSavedDate) in
+            fetchCommits(repoFullName: repoFullName, page: 1, since: lastSavedDate, until: Date())
         }
     }
     
     private func fetchCommits(repoFullName: String, perPage: Int = 100, page: Int, since: Date, until: Date = Date()) {
         gitManager.searchCommits(by: repoFullName, perPage: perPage, page: page, since: since, until: until) { [weak self] gitCommits in
+            
+            var latestSavedDate = since
+            
             gitCommits.forEach { gitCommit in
                 self?.processCommit(gitCommit)
+                
+                guard let date = Date.toISO8601Date(gitCommit.commit.author.date) else { return }
+                
+                if since < date {
+                    latestSavedDate = date
+                }
             }
             
             if gitCommits.count % perPage == 0 {
                 self?.fetchCommits(repoFullName: repoFullName, perPage: perPage, page: page + 1, since: since, until: until)
             } else {
-                self?.repos[repoFullName] = Date()
-                
+                self?.repos[repoFullName] = latestSavedDate
                 self?.userDefaultManager.save(self?.repos ?? [:], UserDefaultManager.repositoryKey)
+            }
+            
+            DispatchQueue.main.async {
+                self?.calendarView.reloadData()
             }
         }
     }
