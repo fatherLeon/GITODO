@@ -124,6 +124,27 @@ final class TodoViewController: UIViewController {
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         updateTableView(by: today)
+        
+        let repos = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
+        guard let lastSavedDate = userDefaultManager.fetchDate(by: UserDefaultManager.lastSavedDateKey) ?? Date().beforeOneYear else { return }
+        
+        repos.forEach { fullName in
+            fetchCommits(repoFullName: fullName, page: 1, since: lastSavedDate, until: Date())
+        }
+    }
+    
+    private func fetchCommits(repoFullName: String, perPage: Int = 100, page: Int, since: Date, until: Date = Date()) {
+        gitManager.searchCommits(by: repoFullName, perPage: perPage, page: page, since: since, until: until) { [weak self] gitCommits in
+            gitCommits.forEach { gitCommit in
+                self?.processCommit(gitCommit)
+            }
+            
+            if gitCommits.count % perPage == 0 {
+                self?.fetchCommits(repoFullName: repoFullName, perPage: perPage, page: page + 1, since: since, until: until)
+            } else {
+                self?.userDefaultManager.save(Date(), UserDefaultManager.lastSavedDateKey)
+            }
+        }
     }
     
     private func processCommit(_ gitCommit: GitCommit) {
