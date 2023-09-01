@@ -52,4 +52,17 @@ extension Date {
         
         return (year, month, day)
     }
+    
+    func isSameDay(by comparedDate: Date) -> Bool {
+        let dateComponent = Calendar.current.dateComponents([.year, .month, .day], from: self)
+        let comparedDateComponent = Calendar.current.dateComponents([.year, .month, .day], from: comparedDate)
+        
+        if dateComponent.year == comparedDateComponent.year &&
+            dateComponent.month == comparedDateComponent.month &&
+            dateComponent.day == comparedDateComponent.day {
+            return true
+        } else {
+            return false
+        }
+    }
 }

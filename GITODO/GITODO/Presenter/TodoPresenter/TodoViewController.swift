@@ -144,6 +144,9 @@ final class TodoViewController: UIViewController {
     
     private func updateCommitsInCalendar(repos: [String: Date]) {
         repos.forEach { (repoFullName, lastSavedDate) in
+            if Date().isSameDay(by: lastSavedDate) {
+                return
+            }
             fetchCommits(repoFullName: repoFullName, page: 1, since: lastSavedDate, until: Date())
         }
     }
