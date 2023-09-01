@@ -524,9 +524,9 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
             return cell
         }
         
-        guard let firstColor = CustomColor.CommitColorSet[safe: 2] as? UIColor,
+        guard let firstColor = CustomColor.CommitColorSet[safe: 0] as? UIColor,
               let secondColor = CustomColor.CommitColorSet[safe: 1] as? UIColor,
-              let thirdColor = CustomColor.CommitColorSet[safe: 0] as? UIColor else {
+              let thirdColor = CustomColor.CommitColorSet[safe: 2] as? UIColor else {
             cell.updateUI(.systemBackground)
             return cell
         }

@@ -73,6 +73,13 @@ final class SearchRepoViewController: UIViewController {
         
         if beforeRepos.keys == repoFullNames.keys { return }
         
+        repoFullNames.forEach { (key, value) in
+            guard let beforeOneYear = Date().beforeOneYear else { return }
+            
+            repoFullNames[key] = beforeOneYear
+        }
+        
+        try? CoreDataManager.shared.removeAll(type: CommitByDateObject.self)
         userDefaultManager.save(self.repoFullNames, UserDefaultManager.repositoryKey)
     }
     
