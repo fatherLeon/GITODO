@@ -90,15 +90,18 @@ extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
         case .reset:
             guard let alertController = content.viewController as? UIAlertController else { return }
             
-            let resetAction = UIAlertAction(title: "초기화", style: .default) { [weak self] _ in
-                self?.userDefaultManager.delete(by: UserDefaultManager.repositoryKey)
+            let todoResetAction = UIAlertAction(title: "할 일 초기화", style: .default) { [weak self] _ in
                 try? self?.coredataManager.removeAll(type: TodoObject.self)
+            }
+            let commitResetAction = UIAlertAction(title: "커밋 초기화", style: .default) { [weak self] _ in
+                self?.userDefaultManager.delete(by: UserDefaultManager.repositoryKey)
                 try? self?.coredataManager.removeAll(type: CommitByDateObject.self)
             }
             let cancelAction = UIAlertAction(title: "닫기", style: .destructive)
             
             alertController.addAction(cancelAction)
-            alertController.addAction(resetAction)
+            alertController.addAction(todoResetAction)
+            alertController.addAction(commitResetAction)
             
             self.present(alertController, animated: true)
         default:

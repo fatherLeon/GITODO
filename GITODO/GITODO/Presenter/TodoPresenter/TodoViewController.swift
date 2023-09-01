@@ -157,6 +157,7 @@ final class TodoViewController: UIViewController {
             if Date().isSameDay(by: lastSavedDate) {
                 return
             }
+            
             fetchCommits(repoFullName: repoFullName, page: 1, since: lastSavedDate, until: Date())
         }
     }
