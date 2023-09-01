@@ -20,6 +20,7 @@ final class TodoViewController: UIViewController {
     private var currentPage: Date?
     private var todos: [TodoObject] = []
     private var repos: [String: Date] = [:]
+    private var maxCommitedNum: Int = 0
     private let coredataManager = CoreDataManager.shared
     private let gitManager = GitManager()
     private let userDefaultManager = UserDefaultManager()
@@ -125,6 +126,15 @@ final class TodoViewController: UIViewController {
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         updateTableView(by: today)
+        
+        calculateMaxCommitedNum()
+    }
+    
+    private func calculateMaxCommitedNum() {
+        guard let data = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject],
+              let maxCommitedNum = data.max(by: { $0.commitedNum < $1.commitedNum })?.commitedNum else { return }
+        
+        self.maxCommitedNum = Int(maxCommitedNum)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -514,9 +524,21 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
             return cell
         }
         
-        if count > 0 {
-            cell.updateUI(CustomColor.darkGreen)
-        } else {
+        guard let firstColor = CustomColor.CommitColorSet[safe: 0] as? UIColor,
+              let secondColor = CustomColor.CommitColorSet[safe: 1] as? UIColor,
+              let thirdColor = CustomColor.CommitColorSet[safe: 2] as? UIColor else {
+            cell.updateUI(.systemBackground)
+            return cell
+        }
+        
+        switch Int(count) {
+        case 0..<Int(Double(maxCommitedNum) * 0.3):
+            cell.updateUI(firstColor)
+        case Int(Double(maxCommitedNum) * 0.3)..<Int(Double(maxCommitedNum) * 0.6):
+            cell.updateUI(secondColor)
+        case Int(Double(maxCommitedNum) * 0.6)...maxCommitedNum:
+            cell.updateUI(thirdColor)
+        default:
             cell.updateUI(.systemBackground)
         }
         return cell
