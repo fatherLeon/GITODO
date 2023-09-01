@@ -12,6 +12,7 @@ final class ConfigViewController: UIViewController {
         case githubRepository
         case theme
         case licence
+        case reset
         
         var title: String {
             switch self {
@@ -21,6 +22,8 @@ final class ConfigViewController: UIViewController {
                 return "테마"
             case .licence:
                 return "라이센스"
+            case .reset:
+                return "초기화"
             }
         }
         
@@ -32,9 +35,14 @@ final class ConfigViewController: UIViewController {
                 return ThemeViewController()
             case .licence:
                 return LicenceViewController()
+            case .reset:
+                return UIAlertController(title: "초기화 하시겠습니까?", message: nil, preferredStyle: .alert)
             }
         }
     }
+    
+    private let coredataManager = CoreDataManager.shared
+    private let userDefaultManager = UserDefaultManager()
     
     private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .insetGrouped)
@@ -53,6 +61,10 @@ final class ConfigViewController: UIViewController {
 
 // MARK: TableView Delegate, Datasource
 extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return self.view.frame.height / 10
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return ConfigContent.allCases.count
     }
@@ -71,10 +83,29 @@ extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-
-        guard let viewController = ConfigContent(rawValue: indexPath.row)?.viewController else { return }
         
-        self.present(viewController, animated: true)
+        guard let content = ConfigContent(rawValue: indexPath.row) else { return }
+        
+        switch content {
+        case .reset:
+            guard let alertController = content.viewController as? UIAlertController else { return }
+            
+            let resetAction = UIAlertAction(title: "초기화", style: .default) { [weak self] _ in
+                self?.userDefaultManager.delete(by: UserDefaultManager.repositoryKey)
+                try? self?.coredataManager.removeAll(type: TodoObject.self)
+                try? self?.coredataManager.removeAll(type: CommitByDateObject.self)
+            }
+            let cancelAction = UIAlertAction(title: "리셋", style: .cancel)
+            
+            alertController.addAction(resetAction)
+            alertController.addAction(cancelAction)
+            
+            self.present(alertController, animated: true)
+        default:
+            let viewController = content.viewController
+            
+            self.present(viewController, animated: true)
+        }
     }
 }
 
