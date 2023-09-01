@@ -95,10 +95,10 @@ extension ConfigViewController: UITableViewDelegate, UITableViewDataSource {
                 try? self?.coredataManager.removeAll(type: TodoObject.self)
                 try? self?.coredataManager.removeAll(type: CommitByDateObject.self)
             }
-            let cancelAction = UIAlertAction(title: "리셋", style: .cancel)
+            let cancelAction = UIAlertAction(title: "닫기", style: .destructive)
             
-            alertController.addAction(resetAction)
             alertController.addAction(cancelAction)
+            alertController.addAction(resetAction)
             
             self.present(alertController, animated: true)
         default:

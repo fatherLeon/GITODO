@@ -132,6 +132,8 @@ final class TodoViewController: UIViewController {
         
         let repos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
         
+        tableView.reloadData()
+        
         if self.repos == repos {
             return
         } else {
@@ -148,7 +150,6 @@ final class TodoViewController: UIViewController {
     
     private func fetchCommits(repoFullName: String, perPage: Int = 100, page: Int, since: Date, until: Date = Date()) {
         gitManager.searchCommits(by: repoFullName, perPage: perPage, page: page, since: since, until: until) { [weak self] gitCommits in
-            
             var latestSavedDate = since
             
             gitCommits.forEach { gitCommit in
@@ -180,14 +181,16 @@ final class TodoViewController: UIViewController {
         
         let targetId = "\(components.year)-\(components.month)-\(components.day)"
         
-        guard var target = try? coredataManager.searchOne(targetId, type: CommitByDateObject.self) as? CommitByDateObject else {
-            saveCommit(year: components.year, month: components.month, day: components.day)
-            return
+        DispatchQueue.main.async { [weak self] in
+            guard var target = try? self?.coredataManager.searchOne(targetId, type: CommitByDateObject.self) as? CommitByDateObject else {
+                self?.saveCommit(year: components.year, month: components.month, day: components.day)
+                return
+            }
+            
+            target.commitedNum += 1
+            
+            self?.updateCommit(target)
         }
-        
-        target.commitedNum += 1
-        
-        updateCommit(target)
     }
     
     private func saveCommit(year: Int, month: Int, day: Int) {
