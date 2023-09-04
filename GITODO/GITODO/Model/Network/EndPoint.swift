@@ -75,6 +75,9 @@ enum EndPoint: Requestable {
         
         request.httpMethod = httpMethod.method
         
+        request.addValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        request.addValue("Bearer \(APIKey.githubAPI)", forHTTPHeaderField: "Authorization")
+        
         return request
     }
 }

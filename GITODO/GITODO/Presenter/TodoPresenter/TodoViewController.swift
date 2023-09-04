@@ -114,6 +114,14 @@ final class TodoViewController: UIViewController {
         
         return view
     }()
+    
+    private let activityView: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .large)
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        return view
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,8 +134,6 @@ final class TodoViewController: UIViewController {
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
         updateTableView(by: today)
-        
-        calculateMaxCommitedNum()
     }
     
     private func calculateMaxCommitedNum() {
@@ -141,6 +147,7 @@ final class TodoViewController: UIViewController {
         super.viewWillAppear(animated)
         
         let repos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
+        calculateMaxCommitedNum()
         
         tableView.reloadData()
         
@@ -164,6 +171,11 @@ final class TodoViewController: UIViewController {
     
     private func fetchCommits(repoFullName: String, perPage: Int = 100, page: Int, since: Date, until: Date = Date()) {
         gitManager.searchCommits(by: repoFullName, perPage: perPage, page: page, since: since, until: until) { [weak self] gitCommits in
+            DispatchQueue.main.async {
+                self?.activityView.isHidden = false
+                self?.activityView.startAnimating()
+            }
+            
             var latestSavedDate = since
             
             gitCommits.forEach { gitCommit in
@@ -176,7 +188,7 @@ final class TodoViewController: UIViewController {
                 }
             }
             
-            if gitCommits.count % perPage == 0 {
+            if gitCommits.count % perPage == 0 && gitCommits.count != 0 {
                 self?.fetchCommits(repoFullName: repoFullName, perPage: perPage, page: page + 1, since: since, until: until)
             } else {
                 self?.repos[repoFullName] = latestSavedDate
@@ -185,6 +197,8 @@ final class TodoViewController: UIViewController {
             
             DispatchQueue.main.async {
                 self?.calendarView.reloadData()
+                self?.activityView.isHidden = true
+                self?.activityView.stopAnimating()
             }
         }
     }
@@ -418,6 +432,7 @@ extension TodoViewController {
         configureCalendarView()
         configureMinusView()
         configureTableView()
+        configureActivityView()
     }
     
     private func configureNavigationHeaderView() {
@@ -509,6 +524,15 @@ extension TodoViewController {
     private func configureGesture() {
         self.view.addGestureRecognizer(gesture)
         self.tableView.panGestureRecognizer.require(toFail: gesture)
+    }
+    
+    private func configureActivityView() {
+        self.view.addSubview(activityView)
+        
+        NSLayoutConstraint.activate([
+            activityView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            activityView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
+        ])
     }
 }
 

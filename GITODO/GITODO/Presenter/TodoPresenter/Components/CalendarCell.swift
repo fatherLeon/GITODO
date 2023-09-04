@@ -35,8 +35,8 @@ final class CalendarCell: FSCalendarCell {
         let rectImage = UIImage(systemName: "rectangle")
         let rectImageView = UIImageView(image: rectImage)
         
-        rectImageView.layer.cornerRadius = self.contentView.bounds.width / 5
-        rectImageView.layer.borderWidth = self.contentView.bounds.width / 10
+        rectImageView.layer.cornerRadius = 10
+        rectImageView.layer.borderWidth = self.contentView.bounds.height / 10
         rectImageView.layer.borderColor = UIColor.systemBackground.cgColor
         
         self.contentView.insertSubview(rectImageView, at: 0)
@@ -74,9 +74,15 @@ final class CalendarCell: FSCalendarCell {
             self.selectionLayer?.path = UIBezierPath(ovalIn: CGRect(x: contentView.frame.width / 2 - diameter / 2, y: contentView.frame.height / 2 - diameter / 2, width: diameter, height: diameter)).cgPath
         }
         
-        if isSelected || dateIsToday {
+        if isSelected {
+            self.rectImageView?.backgroundColor = .systemPurple
+            self.rectImageView?.tintColor = .systemPurple
+        }
+        
+        if dateIsToday {
+            self.rectImageView?.backgroundColor = .systemRed
+            self.rectImageView?.tintColor = .systemRed
             self.titleLabel.font = .boldSystemFont(ofSize: 16)
-            self.titleLabel.textColor = .systemBlue
         }
     }
     

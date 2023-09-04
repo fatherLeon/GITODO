@@ -234,7 +234,8 @@ extension AddingTodoViewController {
         NSLayoutConstraint.activate([
             contentTextView.topAnchor.constraint(equalTo: headTextField.bottomAnchor, constant: 10),
             contentTextView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            contentTextView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
+            contentTextView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            contentTextView.heightAnchor.constraint(greaterThanOrEqualTo: headTextField.heightAnchor, multiplier: 1.5)
         ])
     }
     
@@ -251,7 +252,8 @@ extension AddingTodoViewController {
             datePicker.topAnchor.constraint(equalTo: contentTextView.bottomAnchor),
             datePicker.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
             datePicker.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
-            datePicker.bottomAnchor.constraint(equalTo: buttonsStack.topAnchor)
+            datePicker.bottomAnchor.constraint(equalTo: buttonsStack.topAnchor),
+            datePicker.heightAnchor.constraint(lessThanOrEqualTo: contentTextView.heightAnchor, multiplier: 0.5)
         ])
         
         guard let todo = todoObject else {
