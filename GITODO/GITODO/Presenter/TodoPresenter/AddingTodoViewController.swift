@@ -104,6 +104,11 @@ final class AddingTodoViewController: UIViewController {
     }
     
     @objc private func clickedSaveButton() {
+        if headTextField.text == "" || headTextField.text == nil {
+            showAlert(title: "할 일을 입력해주세요", message: nil)
+            return
+        }
+        
         var result = true
         
         if todoObject == nil {
