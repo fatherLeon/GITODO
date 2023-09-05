@@ -75,8 +75,8 @@ final class CalendarCell: FSCalendarCell {
         }
         
         if isSelected {
-            self.rectImageView?.backgroundColor = .systemPurple
-            self.rectImageView?.tintColor = .systemPurple
+            self.rectImageView?.backgroundColor = .systemRed
+            self.rectImageView?.tintColor = .systemRed
         }
         
         if dateIsToday {
