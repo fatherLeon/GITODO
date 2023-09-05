@@ -146,7 +146,7 @@ final class TodoViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        let repos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
+        let repos = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
         calculateMaxCommitedNum()
         
         tableView.reloadData()
@@ -192,7 +192,7 @@ final class TodoViewController: UIViewController {
                 self?.fetchCommits(repoFullName: repoFullName, perPage: perPage, page: page + 1, since: since, until: until)
             } else {
                 self?.repos[repoFullName] = latestSavedDate
-                self?.userDefaultManager.save(self?.repos ?? [:], UserDefaultManager.repositoryKey)
+                self?.userDefaultManager.saveRepos(self?.repos ?? [:], UserDefaultManager.repositoryKey)
             }
             
             DispatchQueue.main.async {

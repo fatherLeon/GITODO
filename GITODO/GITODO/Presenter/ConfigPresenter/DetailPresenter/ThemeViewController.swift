@@ -8,9 +8,6 @@
 import UIKit
 
 final class ThemeViewController: UIViewController {
-    
-    private var colorSet: [UIColor?] = CustomColor.CommitColorSet
-    
     private enum ColorSet: Int, CaseIterable {
         case green
         case sky
@@ -27,6 +24,8 @@ final class ThemeViewController: UIViewController {
             }
         }
     }
+    
+    private var colorSet: [UIColor?] = CustomColor.CommitColorSet
     
     private let tableView: UITableView = {
         let tableView = UITableView()
@@ -76,6 +75,12 @@ extension ThemeViewController: UITableViewDelegate, UITableViewDataSource {
         
         self.colorSet = colorSet
         CustomColor.CommitColorSet = colorSet
+        
+        let userdefault = UserDefaultManager()
+        let colorKey = CustomColor.getColorKey(by: self.colorSet)
+        
+        userdefault.saveColorKey(colorKey, UserDefaultManager.themeKey)
+        
         self.tableView.reloadData()
     }
 }

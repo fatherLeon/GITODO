@@ -14,6 +14,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        let userDefaultManager = UserDefaultManager()
+        let colorKey = userDefaultManager.fetchColorKey(by: UserDefaultManager.themeKey)
+        
+        let colorSet = CustomColor.pickCustomColorSet(by: colorKey)
+        
+        if colorSet.isEmpty {
+            CustomColor.CommitColorSet = CustomColor.GreenColorSet
+        } else {
+            CustomColor.CommitColorSet = colorSet
+        }
+        
         return true
     }
 

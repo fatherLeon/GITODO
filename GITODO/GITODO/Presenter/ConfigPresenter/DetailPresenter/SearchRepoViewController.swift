@@ -62,14 +62,14 @@ final class SearchRepoViewController: UIViewController {
         
         configureView()
         
-        self.repoFullNames = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
+        self.repoFullNames = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
         
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        let beforeRepos = userDefaultManager.fetch(by: UserDefaultManager.repositoryKey)
+        let beforeRepos = userDefaultManager.fetchRepos(by: UserDefaultManager.repositoryKey)
         
         if beforeRepos.keys == repoFullNames.keys { return }
         
@@ -80,7 +80,7 @@ final class SearchRepoViewController: UIViewController {
         }
         
         try? CoreDataManager.shared.removeAll(type: CommitByDateObject.self)
-        userDefaultManager.save(self.repoFullNames, UserDefaultManager.repositoryKey)
+        userDefaultManager.saveRepos(self.repoFullNames, UserDefaultManager.repositoryKey)
     }
     
     private func searchRepository(text: String, perPage: Int = 30, errorMessage: String?) {

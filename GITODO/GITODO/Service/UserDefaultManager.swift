@@ -9,19 +9,32 @@ import Foundation
 
 struct UserDefaultManager {
     static let repositoryKey = "GitFullName"
+    static let themeKey = "ThemeKey"
     
     private let userDefault = UserDefaults.standard
     
-    func save(_ dict: [String: Date], _ key: String) {
+    func saveRepos(_ dict: [String: Date], _ key: String) {
         userDefault.setValue(dict, forKey: key)
     }
     
-    func fetch(by key: String) -> [String: Date] {
+    func saveColorKey(_ value: String, _ key: String) {
+        userDefault.setValue(value, forKey: key)
+    }
+    
+    func fetchRepos(by key: String) -> [String: Date] {
         guard let dict = userDefault.object(forKey: key) as? [String: Date] else {
             return [:]
         }
         
         return dict
+    }
+    
+    func fetchColorKey(by key: String) -> String {
+        guard let colorKey = userDefault.object(forKey: key) as? String else {
+            return ""
+        }
+        
+        return colorKey
     }
     
     func delete(by key: String) {
