@@ -594,17 +594,17 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
         if fetchTodos(by: date).allSatisfy({ $0.isComplete == true }) {
-            return [.systemGray]
+            return [.secondaryLabel]
         } else {
-            return [.systemRed]
+            return [.label]
         }
     }
     
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventSelectionColorsFor date: Date) -> [UIColor]? {
         if fetchTodos(by: date).allSatisfy({ $0.isComplete == true }) {
-            return [.systemGray]
+            return [.secondaryLabel]
         } else {
-            return [.systemRed]
+            return [.label]
         }
     }
     
