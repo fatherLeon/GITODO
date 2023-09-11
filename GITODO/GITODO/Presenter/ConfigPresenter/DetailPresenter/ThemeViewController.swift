@@ -12,6 +12,10 @@ final class ThemeViewController: UIViewController {
         case green
         case sky
         case red
+        case customGreen
+        case customPurple
+        case customPink
+        case customCyan
         
         var set: [UIColor?] {
             switch self {
@@ -21,6 +25,14 @@ final class ThemeViewController: UIViewController {
                 return CustomColor.RedColorSet
             case .sky:
                 return CustomColor.SkyColorSet
+            case .customGreen:
+                return CustomColor.CustomGreenColorSet
+            case .customPurple:
+                return CustomColor.CustomPurpleColorSet
+            case .customPink:
+                return CustomColor.CustomPinkColorSet
+            case .customCyan:
+                return CustomColor.CustomCyanColorSet
             }
         }
     }

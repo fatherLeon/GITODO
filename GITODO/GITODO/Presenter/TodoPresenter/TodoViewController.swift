@@ -19,7 +19,13 @@ final class TodoViewController: UIViewController {
     private var selectedDate = Date()
     private var currentPage: Date?
     private var todos: [TodoObject] = []
-    private var repos: [String: Date] = [:]
+    private var repos: [String: Date] = [:] {
+        didSet {
+            DispatchQueue.main.async { [weak self] in
+                self?.calendarView.reloadData()
+            }
+        }
+    }
     private var maxCommitedNum: Int = 0
     private let coredataManager = CoreDataManager.shared
     private let gitManager = GitManager()
@@ -69,6 +75,7 @@ final class TodoViewController: UIViewController {
         calendar.scrollDirection = .horizontal
         calendar.locale = Locale.current
         calendar.translatesAutoresizingMaskIntoConstraints = false
+        calendar.appearance.titleDefaultColor = .label
         
         return calendar
     }()
@@ -136,13 +143,6 @@ final class TodoViewController: UIViewController {
         updateTableView(by: today)
     }
     
-    private func calculateMaxCommitedNum() {
-        guard let data = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject],
-              let maxCommitedNum = data.max(by: { $0.commitedNum < $1.commitedNum })?.commitedNum else { return }
-        
-        self.maxCommitedNum = Int(maxCommitedNum)
-    }
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -157,6 +157,13 @@ final class TodoViewController: UIViewController {
             self.repos = repos
             updateCommitsInCalendar(repos: repos)
         }
+    }
+    
+    private func calculateMaxCommitedNum() {
+        guard let data = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject],
+              let maxCommitedNum = data.max(by: { $0.commitedNum < $1.commitedNum })?.commitedNum else { return }
+        
+        self.maxCommitedNum = Int(maxCommitedNum)
     }
     
     private func updateCommitsInCalendar(repos: [String: Date]) {
@@ -196,7 +203,6 @@ final class TodoViewController: UIViewController {
             }
             
             DispatchQueue.main.async {
-                self?.calendarView.reloadData()
                 self?.activityView.isHidden = true
                 self?.activityView.stopAnimating()
             }
