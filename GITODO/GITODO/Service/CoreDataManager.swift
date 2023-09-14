@@ -15,7 +15,14 @@ final class CoreDataManager {
     private init() { }
     
     private static let persistentContainer: NSPersistentContainer = {
+        guard var url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.Gitodo") else { fatalError("error data path")}
+        
+        url.appendPathComponent("GITODO.sqlite")
+        
+        let storeDescription = NSPersistentStoreDescription(url: url)
         let container = NSPersistentContainer(name: "Todo")
+        
+        container.persistentStoreDescriptions = [storeDescription]
         
         container.loadPersistentStores { desc, error in
             if let error = error as NSError? {
@@ -44,14 +51,14 @@ final class CoreDataManager {
         try context.save()
     }
     
-    func fetch(_ type: Interactionable.Type) throws -> [Interactionable] {
+    func fetch(_ type: Interactionable.Type) -> [Interactionable] {
         let request = type.entityType.fetchRequest()
         let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
         
         request.entity = entity
         
-        guard let fetchedData = try context.fetch(request) as? [NSManagedObject] else {
-            throw DBError.fetchError
+        guard let fetchedData = try? context.fetch(request) as? [NSManagedObject] else {
+            return []
         }
         
         return fetchedData.compactMap { object in
@@ -59,7 +66,7 @@ final class CoreDataManager {
         }
     }
     
-    func search(_ id: String, type: Interactionable.Type) throws -> [Interactionable] {
+    func search(_ id: String, type: Interactionable.Type) -> [Interactionable] {
         let request = type.entityType.fetchRequest()
         let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
         
@@ -75,7 +82,7 @@ final class CoreDataManager {
                 return type.transform(object)
             }
         } catch {
-            throw DBError.fetchError
+            return []
         }
     }
     

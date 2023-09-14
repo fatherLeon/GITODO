@@ -8,7 +8,7 @@
 import CoreData
 import Foundation
 
-struct TodoObject: Interactionable {
+struct TodoObject: Interactionable, Identifiable {
     static var entityType: NSManagedObject.Type = Todo.self
     static var entityName: String = "Todo"
     
