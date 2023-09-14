@@ -57,4 +57,14 @@ struct TodoObject: Interactionable, Identifiable {
         
         return TodoObject(year: data.year, month: data.month, day: data.day, hour: data.hour, minute: data.minute, second: data.second, title: title, memo: memo, storedDate: storedDate, isComplete: data.isComplete)
     }
+    
+    static func getTodosNearest(by date: Date, todos: [TodoObject]) -> [TodoObject] {
+        let filteredTodos = todos.filter { $0.storedDate > date }
+        
+        let sortedTodos = filteredTodos.sorted { lhs, rhs in
+            return lhs.storedDate < rhs.storedDate
+        }
+        
+        return sortedTodos
+    }
 }
