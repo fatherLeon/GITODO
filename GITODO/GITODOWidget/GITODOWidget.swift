@@ -27,7 +27,6 @@ struct Provider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [SimpleEntry] = []
 
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
         let currentDate = Date()
         let (year, month, day) = currentDate.convertDateToYearMonthDay()!
         let todos = CoreDataManager.shared.search("\(year)-\(month)-\(day)", type: TodoObject.self) as! [TodoObject]
@@ -35,7 +34,8 @@ struct Provider: TimelineProvider {
         for hourOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
             let nonCompletedTodos = todos.filter { !$0.isComplete }
-            let entry = SimpleEntry(date: entryDate, todos: nonCompletedTodos)
+            let sortedTodos = TodoObject.getTodosNearest(by: currentDate, todos: nonCompletedTodos)
+            let entry = SimpleEntry(date: entryDate, todos: sortedTodos)
             entries.append(entry)
         }
 
@@ -50,10 +50,33 @@ struct SimpleEntry: TimelineEntry {
 }
 
 struct GITODOWidgetEntryView : View {
+    @Environment(\.widgetFamily) var family: WidgetFamily
     var entry: Provider.Entry
     
     var body: some View {
-        Text("\(entry.todos.first!.title)")
+        switch family {
+        case .systemSmall:
+            Text("\(entry.todos.first?.title ?? "할 일...")")
+        case .systemMedium:
+            if entry.todos.isEmpty {
+                Text("할 일...")
+            } else {
+                HStack {
+                    VStack {
+                        Text("\(entry.todos[safe: 0]?.title ?? "")")
+                        Text("\(entry.todos[safe: 1]?.title ?? "")")
+                    }
+                    VStack {
+                        Text("\(entry.todos[safe: 2]?.title ?? "")")
+                        Text("\(entry.todos[safe: 3]?.title ?? "")")
+                    }
+                }
+            }
+        case .systemLarge:
+            Text("\(entry.todos.first?.title ?? "할 일...")")
+        default:
+            Text("Error😭😭")
+        }
     }
 }
 
@@ -77,6 +100,6 @@ struct GITODOWidget_Previews: PreviewProvider {
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: false),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: true),
         ]))
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .previewContext(WidgetPreviewContext(family: .systemMedium))
     }
 }

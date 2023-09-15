@@ -59,10 +59,18 @@ struct TodoObject: Interactionable, Identifiable {
     }
     
     static func getTodosNearest(by date: Date, todos: [TodoObject]) -> [TodoObject] {
-        let filteredTodos = todos.filter { $0.storedDate > date }
+        let filteredTodos = todos.filter { todo in
+            let (standardHour, _) = date.convertDateToHourMinute()!
+            
+            if todo.hour > standardHour {
+                return true
+            } else {
+                return false
+            }
+        }
         
         let sortedTodos = filteredTodos.sorted { lhs, rhs in
-            return lhs.storedDate < rhs.storedDate
+            return Date.convertDate(year: lhs.year, month: lhs.month, day: lhs.day, hour: lhs.hour, minute: lhs.minute) < Date.convertDate(year: rhs.year, month: rhs.month, day: rhs.day, hour: rhs.hour, minute: rhs.minute)
         }
         
         return sortedTodos
