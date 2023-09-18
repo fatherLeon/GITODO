@@ -70,7 +70,17 @@ struct TodoObject: Interactionable, Identifiable {
         }
         let noCompletedTodos = filteredTodos.filter { $0.isComplete == false }
         let sortedTodos = noCompletedTodos.sorted { lhs, rhs in
-            return Date.convertDate(year: lhs.year, month: lhs.month, day: lhs.day, hour: lhs.hour, minute: lhs.minute) < Date.convertDate(year: rhs.year, month: rhs.month, day: rhs.day, hour: rhs.hour, minute: rhs.minute)
+            if lhs.hour < rhs.hour {
+                return true
+            } else if lhs.hour > rhs.hour {
+                return false
+            } else {
+                if lhs.minute < rhs.minute {
+                    return true
+                } else {
+                    return false
+                }
+            }
         }
         
         return sortedTodos
