@@ -37,7 +37,7 @@ struct UserDefaultManager {
     
     func fetchColorKey(by key: String) -> String {
         guard let colorKey = userDefault.object(forKey: key) as? String else {
-            return ""
+            return "GreenColorSet"
         }
         
         return colorKey
