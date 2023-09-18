@@ -14,13 +14,13 @@ struct Provider: TimelineProvider {
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일1", memo: "", storedDate: Date(), isComplete: true),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일2", memo: "", storedDate: Date(), isComplete: true),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일3", memo: "", storedDate: Date(), isComplete: true)
-        ], commitedNum: 9)
+        ], commitedNum: 9, commitColor: .systemGreen)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
         let entry = SimpleEntry(date: Date(), todos: [
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일....", memo: "", storedDate: Date(), isComplete: false)
-        ], commitedNum: 11)
+        ], commitedNum: 11, commitColor: .systemGreen)
         completion(entry)
     }
 
@@ -38,11 +38,15 @@ struct Provider: TimelineProvider {
             commitedNum += num
         }
         
+        let colorKey = UserDefaultManager().fetchColorKey(by: UserDefaultManager.themeKey)
+        let colorSet = CustomColor.pickCustomColorSet(by: colorKey)
+        let color = colorSet[safe: 1]!
+        
         for hourOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
             let nonCompletedTodos = todos.filter { !$0.isComplete }
             let sortedTodos = TodoObject.getTodosNearest(by: currentDate, todos: nonCompletedTodos)
-            let entry = SimpleEntry(date: entryDate, todos: sortedTodos, commitedNum: commitedNum)
+            let entry = SimpleEntry(date: entryDate, todos: sortedTodos, commitedNum: commitedNum, commitColor: color!)
             entries.append(entry)
         }
 
@@ -55,6 +59,7 @@ struct SimpleEntry: TimelineEntry {
     let date: Date
     let todos: [TodoObject]
     let commitedNum: Int
+    let commitColor: UIColor
 }
 
 struct GITODOWidgetEntryView : View {
@@ -76,7 +81,7 @@ struct GITODOWidgetEntryView : View {
                     .padding(.top, 20)
                     
                     ZStack {
-                        Color.gray
+                        Color(uiColor: entry.commitColor)
                             .opacity(0.3)
                     }
                     .overlay {
@@ -97,7 +102,7 @@ struct GITODOWidgetEntryView : View {
         case .systemMedium:
             HStack(spacing: 0) {
                 ZStack {
-                    Color.green
+                    Color(uiColor: entry.commitColor)
                     Text("🎉\(entry.commitedNum)")
                         .font(.title3)
                 }
@@ -142,7 +147,7 @@ struct GITODOWidget_Previews: PreviewProvider {
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "집에가서 골프존 자기소개서 쓰기", memo: "", storedDate: Date(), isComplete: true),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: false),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: true),
-        ], commitedNum: 10))
+        ], commitedNum: 10, commitColor: .systemGreen))
             .previewContext(WidgetPreviewContext(family: .systemMedium))
     }
 }
