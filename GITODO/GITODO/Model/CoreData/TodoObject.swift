@@ -62,14 +62,14 @@ struct TodoObject: Interactionable, Identifiable {
         let filteredTodos = todos.filter { todo in
             let (standardHour, _) = date.convertDateToHourMinute()!
             
-            if todo.hour > standardHour {
+            if todo.hour >= standardHour {
                 return true
             } else {
                 return false
             }
         }
-        
-        let sortedTodos = filteredTodos.sorted { lhs, rhs in
+        let noCompletedTodos = filteredTodos.filter { $0.isComplete == false }
+        let sortedTodos = noCompletedTodos.sorted { lhs, rhs in
             return Date.convertDate(year: lhs.year, month: lhs.month, day: lhs.day, hour: lhs.hour, minute: lhs.minute) < Date.convertDate(year: rhs.year, month: rhs.month, day: rhs.day, hour: rhs.hour, minute: rhs.minute)
         }
         
