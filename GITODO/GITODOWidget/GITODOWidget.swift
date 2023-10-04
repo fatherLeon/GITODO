@@ -19,7 +19,9 @@ struct Provider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
         let entry = SimpleEntry(date: Date(), todos: [
-            TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일....", memo: "", storedDate: Date(), isComplete: false)
+            TodoObject(year: 1, month: 1, day: 1, hour: 13, minute: 10, second: 1, title: "할 일~~...", memo: "", storedDate: Date(), isComplete: false),
+            TodoObject(year: 1, month: 1, day: 1, hour: 14, minute: 10, second: 1, title: "다음 할 일", memo: "", storedDate: Date().addingTimeInterval(10), isComplete: false),
+            TodoObject(year: 1, month: 1, day: 1, hour: 14, minute: 15, second: 1, title: "다다음 할 일", memo: "", storedDate: Date(), isComplete: false)
         ], commitedNum: 11, commitColor: .systemGreen)
         completion(entry)
     }
@@ -78,7 +80,7 @@ struct GITODOWidgetEntryView : View {
                             .font(.title2)
                             .bold()
                     }
-                    .padding(.top, 10)
+                    .padding(.top, 20)
                     
                     ZStack {
                         Color(uiColor: entry.commitColor)
