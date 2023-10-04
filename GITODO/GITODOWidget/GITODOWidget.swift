@@ -161,7 +161,7 @@ struct GITODOWidget_Previews: PreviewProvider {
 
 extension View {
     func widgetBacground(_ backgroundView: some View) -> some View {
-        if #available(iOSApplicationExtension 17.0, *) {
+        if #available(iOS 17.0, *) {
             return containerBackground(for: .widget) {
                 backgroundView
             }

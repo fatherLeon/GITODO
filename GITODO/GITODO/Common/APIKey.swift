@@ -6,5 +6,5 @@
 //
 
 struct APIKey {
-    static let githubAPI: String = "깃허브 API Key"
+    static let githubAPI: String = "깃허브 API"
 }
