@@ -75,17 +75,18 @@ struct GITODOWidgetEntryView : View {
                 if let todo = entry.todos.first {
                     HStack {
                         Text("\(todo.month)월 \(todo.day)일")
-                            .font(.title)
+                            .font(.title2)
                             .bold()
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 10)
                     
                     ZStack {
                         Color(uiColor: entry.commitColor)
                             .opacity(0.3)
                     }
+                    .clipShape(.rect(cornerRadius: 5))
                     .overlay {
-                        VStack {
+                        VStack(spacing: 5) {
                             Text("\(todo.title)")
                                 .lineLimit(2)
                                 .font(.body)
@@ -99,6 +100,7 @@ struct GITODOWidgetEntryView : View {
                         .lineLimit(0)
                 }
             }
+            .widgetBacground(Color(UIColor.systemBackground))
         case .systemMedium:
             HStack(spacing: 0) {
                 ZStack {
@@ -106,6 +108,7 @@ struct GITODOWidgetEntryView : View {
                     Text("🎉\(entry.commitedNum)")
                         .font(.title3)
                 }
+                .clipShape(.rect(cornerRadius: 10))
                 .frame(minWidth: 0, maxWidth: .infinity)
                 
                 Spacer()
@@ -122,8 +125,10 @@ struct GITODOWidgetEntryView : View {
                 }
                 .frame(minWidth: 0, maxWidth: .infinity)
             }
+            .widgetBacground(Color(UIColor.systemBackground))
         default:
             Text("Error😭😭")
+                .widgetBacground(Color(UIColor.systemBackground))
         }
     }
 }
@@ -148,6 +153,18 @@ struct GITODOWidget_Previews: PreviewProvider {
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: false),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: true),
         ], commitedNum: 10, commitColor: .systemGreen))
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+    }
+}
+
+extension View {
+    func widgetBacground(_ backgroundView: some View) -> some View {
+        if #available(iOSApplicationExtension 17.0, *) {
+            return containerBackground(for: .widget) {
+                backgroundView
+            }
+        } else {
+            return background(backgroundView)
+        }
     }
 }
