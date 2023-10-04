@@ -160,7 +160,7 @@ final class TodoViewController: UIViewController {
     }
     
     private func calculateMaxCommitedNum() {
-        guard let data = try? coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject],
+        guard let data = coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject],
               let maxCommitedNum = data.max(by: { $0.commitedNum < $1.commitedNum })?.commitedNum else { return }
         
         self.maxCommitedNum = Int(maxCommitedNum)
@@ -298,7 +298,7 @@ final class TodoViewController: UIViewController {
         
         let targetId = "\(components.year)-\(components.month)-\(components.day)"
         
-        guard let todos = try? coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
+        guard let todos = coredataManager.search(targetId, type: TodoObject.self) as? [TodoObject] else {
             return []
         }
         

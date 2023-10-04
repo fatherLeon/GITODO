@@ -53,6 +53,15 @@ extension Date {
         return (year, month, day)
     }
     
+    func convertDateToHourMinute() -> (hour: Int, minute: Int)? {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: self)
+        
+        guard let hour = components.hour,
+              let minute = components.minute else { return nil }
+        
+        return (hour, minute)
+    }
+    
     func isSameDay(by comparedDate: Date) -> Bool {
         let dateComponent = Calendar.current.dateComponents([.year, .month, .day], from: self)
         let comparedDateComponent = Calendar.current.dateComponents([.year, .month, .day], from: comparedDate)
@@ -64,5 +73,13 @@ extension Date {
         } else {
             return false
         }
+    }
+    
+    static func convertDate(year: Int16, month: Int16, day: Int16, hour: Int16, minute: Int16) -> Date {
+        let components = DateComponents(year: Int(year), month: Int(month), day: Int(day), hour: Int(hour), minute: Int(minute))
+        
+        guard let date = components.date else { return Date() }
+        
+        return date
     }
 }

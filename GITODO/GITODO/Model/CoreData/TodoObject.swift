@@ -8,7 +8,7 @@
 import CoreData
 import Foundation
 
-struct TodoObject: Interactionable {
+struct TodoObject: Interactionable, Identifiable {
     static var entityType: NSManagedObject.Type = Todo.self
     static var entityName: String = "Todo"
     
@@ -56,5 +56,33 @@ struct TodoObject: Interactionable {
               let storedDate = data.storedDate else { return nil }
         
         return TodoObject(year: data.year, month: data.month, day: data.day, hour: data.hour, minute: data.minute, second: data.second, title: title, memo: memo, storedDate: storedDate, isComplete: data.isComplete)
+    }
+    
+    static func getTodosNearest(by date: Date, todos: [TodoObject]) -> [TodoObject] {
+        let filteredTodos = todos.filter { todo in
+            let (standardHour, _) = date.convertDateToHourMinute()!
+            
+            if todo.hour >= standardHour {
+                return true
+            } else {
+                return false
+            }
+        }
+        let noCompletedTodos = filteredTodos.filter { $0.isComplete == false }
+        let sortedTodos = noCompletedTodos.sorted { lhs, rhs in
+            if lhs.hour < rhs.hour {
+                return true
+            } else if lhs.hour > rhs.hour {
+                return false
+            } else {
+                if lhs.minute < rhs.minute {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+        
+        return sortedTodos
     }
 }

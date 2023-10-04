@@ -11,7 +11,13 @@ struct UserDefaultManager {
     static let repositoryKey = "GitFullName"
     static let themeKey = "ThemeKey"
     
-    private let userDefault = UserDefaults.standard
+    private let userDefault: UserDefaults = {
+        guard let userDefault = UserDefaults(suiteName: "group.Gitodo") else {
+            fatalError("Invalid group in userdefaults")
+        }
+        
+        return userDefault
+    }()
     
     func saveRepos(_ dict: [String: Date], _ key: String) {
         userDefault.setValue(dict, forKey: key)
@@ -31,7 +37,7 @@ struct UserDefaultManager {
     
     func fetchColorKey(by key: String) -> String {
         guard let colorKey = userDefault.object(forKey: key) as? String else {
-            return ""
+            return "GreenColorSet"
         }
         
         return colorKey
