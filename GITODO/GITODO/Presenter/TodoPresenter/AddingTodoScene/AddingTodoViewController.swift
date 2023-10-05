@@ -7,10 +7,12 @@
 
 import UIKit
 import RxSwift
+import RxCocoa
 
 final class AddingTodoViewController: UIViewController {
     
     private let viewModel: AddingTodoViewModel
+    private let disposeBag = DisposeBag()
     private weak var delegate: AddingTodoDelegate?
     
     private let minusView: MinusView = {
@@ -93,6 +95,7 @@ final class AddingTodoViewController: UIViewController {
         super.viewDidLoad()
         
         configureUI()
+        binding()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -101,67 +104,34 @@ final class AddingTodoViewController: UIViewController {
         super.viewWillDisappear(animated)
     }
     
-    @objc private func clickedSaveButton() {
-        if headTextField.text == "" || headTextField.text == nil {
-            showAlert(title: "할 일을 입력해주세요", message: nil)
-            return
-        }
+    private func binding() {
+        headTextField.rx.text
+            .orEmpty
+            .bind(to: viewModel.todoTitleText)
+            .disposed(by: disposeBag)
         
-        var result = true
+        saveButton.rx.tap
+            .subscribe { _ in
+                let result = self.viewModel.processTodo()
+                
+                if result {
+                    self.delegate?.updateTableView(by: self.datePicker.date)
+                    self.dismiss(animated: true)
+                } else {
+                    self.showAlert(title: "저장에 실패하였습니다.", message: nil)
+                }
+            }
+            .disposed(by: disposeBag)
         
-        if todoObject == nil {
-            result = save()
-        } else {
-            result = update()
-        }
+        cancelButton.rx.tap
+            .subscribe { _ in
+                self.dismiss(animated: true)
+            }
+            .disposed(by: disposeBag)
         
-        if result {
-            delegate?.updateTableView(by: datePicker.date)
-            self.dismiss(animated: true)
-        }
-    }
-    
-    @objc private func clickedCancelButton() {
-        self.dismiss(animated: true)
-    }
-    
-    private func save() -> Bool {
-        guard let todo = makeTodoObject() else { return false }
-        
-        do {
-            try coredataManager.save(todo)
-            return true
-        } catch {
-            showAlert(title: "저장 실패", message: nil)
-            return false
-        }
-    }
-    
-    private func update() -> Bool {
-        guard let storedDate = todoObject?.storedDate,
-              let todo = makeTodoObject() else { return false }
-        
-        do {
-            try coredataManager.update(storedDate: storedDate, data: todo, type: TodoObject.self)
-            return true
-        } catch {
-            showAlert(title: "업데이트 실패", message: nil)
-            return false
-        }
-    }
-    
-    private func makeTodoObject() -> TodoObject? {
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: datePicker.date)
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day,
-              let hour = components.hour,
-              let minute = components.minute,
-              let second = components.second else { return nil }
-        
-        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: Date(), isComplete: false)
-        
-        return todo
+        viewModel.isWritingCompleted
+            .bind(to: saveButton.rx.isEnabled)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -279,9 +249,6 @@ extension AddingTodoViewController {
     
     private func configureSaveAndCancelButton() {
         self.view.addSubview(buttonsStack)
-        
-        saveButton.addTarget(self, action: #selector(clickedSaveButton), for: .touchUpInside)
-        cancelButton.addTarget(self, action: #selector(clickedCancelButton), for: .touchUpInside)
         
         buttonsStack.spacing = self.view.frame.width / 20
         
