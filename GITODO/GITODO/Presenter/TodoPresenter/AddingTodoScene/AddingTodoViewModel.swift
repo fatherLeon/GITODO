@@ -69,17 +69,19 @@ final class AddingTodoViewModel {
             return nil
         }
         
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: todoDate
-        )
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day,
-              let hour = components.hour,
-              let minute = components.minute,
-              let second = components.second else { return nil }
+        guard let (year, month, day) = todoDate.convertDateToYearMonthDay(),
+              let (hour, minute) = todoDate.convertDateToHourMinute() else {
+            return nil
+        }
         
-        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: todoTitle, memo: todoMemo, storedDate: todoDate, isComplete: false)
-        
-        return todo
+        if todoMemo == "메모를 입력해주세요" {
+            let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: 0, title: todoTitle, memo: "", storedDate: todoDate, isComplete: false)
+            
+            return todo
+        } else {
+            let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: 0, title: todoTitle, memo: todoMemo, storedDate: todoDate, isComplete: false)
+            
+            return todo
+        }
     }
 }

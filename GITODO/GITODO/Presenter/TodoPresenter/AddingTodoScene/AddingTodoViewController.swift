@@ -37,7 +37,6 @@ final class AddingTodoViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.text = "메모를 입력해주세요"
         view.font = .preferredFont(forTextStyle: .callout)
-        view.textColor = .placeholderText
         
         return view
     }()
@@ -201,11 +200,16 @@ extension AddingTodoViewController {
     }
     
     private func configureContentTextView() {
-        todoMemoTextView.text = viewModel.todoObject?.memo ?? "메모를 입력해주세요"
+        if let todoObejct = viewModel.todoObject {
+            todoMemoTextView.text = todoObejct.memo
+            todoMemoTextView.textColor = .label
+        } else {
+            todoMemoTextView.text = "메모를 입력해주세요"
+            todoMemoTextView.textColor = .placeholderText
+        }
         
         self.view.addSubview(todoMemoTextView)
         
-        todoMemoTextView.textColor = .secondaryLabel
         todoMemoTextView.layer.borderColor = UIColor.gray.cgColor
         todoMemoTextView.layer.borderWidth = 0.25
         todoMemoTextView.layer.cornerRadius = 10
