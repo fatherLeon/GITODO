@@ -129,9 +129,7 @@ final class AddingTodoViewController: UIViewController {
         
         saveButton.rx.tap
             .subscribe { _ in
-                let result = self.viewModel.processTodo()
-                
-                if result {
+                if self.viewModel.processTodo() {
                     self.delegate?.updateTableView(by: self.datePicker.date)
                     self.dismiss(animated: true)
                 } else {
@@ -234,11 +232,7 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
-        if viewModel.todoObject == nil {
-            datePicker.datePickerMode = .time
-        } else {
-            datePicker.datePickerMode = .dateAndTime
-        }
+        datePicker.datePickerMode = viewModel.todoObject == nil ? .time: .dateAndTime
         
         self.view.addSubview(datePicker)
         
@@ -255,14 +249,7 @@ extension AddingTodoViewController {
             return
         }
         
-        var components = DateComponents()
-        
-        components.year = Int(todo.year)
-        components.month = Int(todo.month)
-        components.day = Int(todo.day)
-        components.hour = Int(todo.hour)
-        components.minute = Int(todo.minute)
-        
+        let components = DateComponents(year: Int(todo.year), month: Int(todo.month), day: Int(todo.day), hour: Int(todo.hour), minute: Int(todo.minute))
         let targetedDate = Calendar.current.date(from: components) ?? viewModel.targetDate
         
         datePicker.setDate(targetedDate, animated: true)

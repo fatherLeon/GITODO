@@ -36,7 +36,7 @@ final class AddingTodoViewModel {
             return false
         }
         
-        return todoObject == nil ? save() : update()
+        return todoObject == nil ? save(): update()
     }
     
     private func save() -> Bool {
