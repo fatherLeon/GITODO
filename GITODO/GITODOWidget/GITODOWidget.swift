@@ -100,7 +100,8 @@ struct GITODOWidgetEntryView : View {
                         }
                     } else {
                         Text("오늘 할일이 등록되지 않았습니다.")
-                            .lineLimit(0)
+                            .font(.callout)
+                            .lineLimit(4)
                     }
                 }
             }
@@ -117,7 +118,7 @@ struct GITODOWidgetEntryView : View {
                 
                 Spacer()
 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 5) {
                     ForEach(0..<5) { index in
                         HStack {
                             if let todo = entry.todos[safe: index] {
