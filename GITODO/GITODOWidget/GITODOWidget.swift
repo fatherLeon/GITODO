@@ -10,7 +10,7 @@ import SwiftUI
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), todos: [
+        SimpleEntry(date: Date(), month: 1, day: 1, todos: [
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일1", memo: "", storedDate: Date(), isComplete: true),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일2", memo: "", storedDate: Date(), isComplete: true),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "할 일3", memo: "", storedDate: Date(), isComplete: true)
@@ -18,7 +18,7 @@ struct Provider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), todos: [
+        let entry = SimpleEntry(date: Date(), month: 1, day: 1, todos: [
             TodoObject(year: 1, month: 1, day: 1, hour: 13, minute: 10, second: 1, title: "할 일~~...", memo: "", storedDate: Date(), isComplete: false),
             TodoObject(year: 1, month: 1, day: 1, hour: 14, minute: 10, second: 1, title: "다음 할 일", memo: "", storedDate: Date().addingTimeInterval(10), isComplete: false),
             TodoObject(year: 1, month: 1, day: 1, hour: 14, minute: 15, second: 1, title: "다다음 할 일", memo: "", storedDate: Date(), isComplete: false)
@@ -48,7 +48,7 @@ struct Provider: TimelineProvider {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
             let nonCompletedTodos = todos.filter { !$0.isComplete }
             let sortedTodos = TodoObject.getTodosNearest(by: currentDate, todos: nonCompletedTodos)
-            let entry = SimpleEntry(date: entryDate, todos: sortedTodos, commitedNum: commitedNum, commitColor: color!)
+            let entry = SimpleEntry(date: entryDate, month: month, day: day, todos: sortedTodos, commitedNum: commitedNum, commitColor: color!)
             entries.append(entry)
         }
 
@@ -59,6 +59,8 @@ struct Provider: TimelineProvider {
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
+    let month: Int
+    let day: Int
     let todos: [TodoObject]
     let commitedNum: Int
     let commitColor: UIColor
@@ -74,20 +76,20 @@ struct GITODOWidgetEntryView : View {
         switch family {
         case .systemSmall:
             VStack {
-                if let todo = entry.todos.first {
-                    HStack {
-                        Text("\(todo.month)월 \(todo.day)일")
-                            .font(.title2)
-                            .bold()
-                    }
-                    .padding(.top, 20)
-                    
-                    ZStack {
-                        Color(uiColor: entry.commitColor)
-                            .opacity(0.3)
-                    }
-                    .clipShape(.rect(cornerRadius: 5))
-                    .overlay {
+                HStack {
+                    Text("\(entry.month)월 \(entry.day)일")
+                        .font(.title2)
+                        .bold()
+                }
+                .padding(.top, 20)
+                
+                ZStack {
+                    Color(uiColor: entry.commitColor)
+                        .opacity(0.3)
+                }
+                .clipShape(.rect(cornerRadius: 5))
+                .overlay {
+                    if let todo = entry.todos.first {
                         VStack(spacing: 5) {
                             Text("\(todo.title)")
                                 .lineLimit(2)
@@ -96,10 +98,11 @@ struct GITODOWidgetEntryView : View {
                                 .font(.body)
                                 .foregroundColor(.secondary)
                         }
+                    } else {
+                        Text("오늘 할일이 등록되지 않았습니다.")
+                            .font(.callout)
+                            .lineLimit(4)
                     }
-                } else {
-                    Text("할 일을 입력해주세요...")
-                        .lineLimit(0)
                 }
             }
             .widgetBacground(Color(UIColor.systemBackground))
@@ -115,7 +118,7 @@ struct GITODOWidgetEntryView : View {
                 
                 Spacer()
 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 5) {
                     ForEach(0..<5) { index in
                         HStack {
                             if let todo = entry.todos[safe: index] {
@@ -150,7 +153,7 @@ struct GITODOWidget: Widget {
 
 struct GITODOWidget_Previews: PreviewProvider {
     static var previews: some View {
-        GITODOWidgetEntryView(entry: SimpleEntry(date: Date(), todos: [
+        GITODOWidgetEntryView(entry: SimpleEntry(date: Date(), month: 1, day: 1, todos: [
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "집에가서 골프존 자기소개서 쓰기", memo: "", storedDate: Date(), isComplete: true),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: false),
             TodoObject(year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, title: "타이틀 2", memo: "", storedDate: Date(), isComplete: true),
