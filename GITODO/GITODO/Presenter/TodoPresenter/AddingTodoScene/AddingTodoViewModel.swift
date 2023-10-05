@@ -5,7 +5,7 @@
 //  Created by 강민수 on 2023/10/05.
 //
 
-import RxSwift
+import RxSwift생
 import Foundation
 
 final class AddingTodoViewModel {
@@ -14,8 +14,8 @@ final class AddingTodoViewModel {
     
     private let coredataManager = CoreDataManager.shared
     
-    let todoTitleText: BehaviorSubject<String> = BehaviorSubject(value: "")
-    let todoMemoText: BehaviorSubject<String> = BehaviorSubject(value: "")
+    let todoTitleText: BehaviorSubject<String>
+    let todoMemoText: BehaviorSubject<String>
     let todoDate: BehaviorSubject<Date>
     
     var isWritingCompleted: Observable<Bool> {
@@ -28,6 +28,8 @@ final class AddingTodoViewModel {
     init(targetDate: Date, todoObject: TodoObject?) {
         self.targetDate = targetDate
         self.todoObject = todoObject
+        self.todoTitleText = BehaviorSubject(value: "")
+        self.todoMemoText = BehaviorSubject(value: "")
         self.todoDate = BehaviorSubject(value: targetDate)
     }
     
