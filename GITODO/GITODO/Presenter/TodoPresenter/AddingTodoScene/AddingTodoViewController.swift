@@ -22,7 +22,7 @@ final class AddingTodoViewController: UIViewController {
         
         return view
     }()
-    private let headTextField: UITextField = {
+    private let todoTitleTextField: UITextField = {
         let view = UITextField()
         
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -31,7 +31,7 @@ final class AddingTodoViewController: UIViewController {
         
         return view
     }()
-    private let contentTextView: UITextView = {
+    private let todoMemoTextView: UITextView = {
         let view = UITextView()
         
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -105,9 +105,18 @@ final class AddingTodoViewController: UIViewController {
     }
     
     private func binding() {
-        headTextField.rx.text
+        todoTitleTextField.rx.text
             .orEmpty
             .bind(to: viewModel.todoTitleText)
+            .disposed(by: disposeBag)
+        
+        todoMemoTextView.rx.text
+            .orEmpty
+            .bind(to: viewModel.todoMemoText)
+            .disposed(by: disposeBag)
+        
+        datePicker.rx.date
+            .bind(to: viewModel.todoDate)
             .disposed(by: disposeBag)
         
         saveButton.rx.tap
@@ -169,46 +178,46 @@ extension AddingTodoViewController {
     }
     
     private func configureHeadTextField() {
-        headTextField.text = viewModel.todoObject?.title ?? ""
+        todoTitleTextField.text = viewModel.todoObject?.title ?? ""
         
-        self.view.addSubview(headTextField)
+        self.view.addSubview(todoTitleTextField)
         
-        headTextField.layer.cornerRadius = 10
-        headTextField.layer.borderWidth = 0.25
-        headTextField.layer.borderColor = UIColor.gray.cgColor
+        todoTitleTextField.layer.cornerRadius = 10
+        todoTitleTextField.layer.borderWidth = 0.25
+        todoTitleTextField.layer.borderColor = UIColor.gray.cgColor
         
-        let paddingView : UIView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: headTextField.frame.height))
-        headTextField.leftView = paddingView
-        headTextField.leftViewMode = .always
+        let paddingView : UIView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: todoTitleTextField.frame.height))
+        todoTitleTextField.leftView = paddingView
+        todoTitleTextField.leftViewMode = .always
         
-        headTextField.rightView = paddingView
-        headTextField.rightViewMode = .always
+        todoTitleTextField.rightView = paddingView
+        todoTitleTextField.rightViewMode = .always
         
         NSLayoutConstraint.activate([
-            headTextField.topAnchor.constraint(equalTo: minusView.bottomAnchor, constant: 10),
-            headTextField.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            headTextField.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            headTextField.heightAnchor.constraint(equalToConstant: self.view.frame.height / 20)
+            todoTitleTextField.topAnchor.constraint(equalTo: minusView.bottomAnchor, constant: 10),
+            todoTitleTextField.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            todoTitleTextField.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            todoTitleTextField.heightAnchor.constraint(equalToConstant: self.view.frame.height / 20)
         ])
     }
     
     private func configureContentTextView() {
-        contentTextView.delegate = self
-        contentTextView.text = viewModel.todoObject?.memo ?? "메모를 입력해주세요"
+        todoMemoTextView.delegate = self
+        todoMemoTextView.text = viewModel.todoObject?.memo ?? "메모를 입력해주세요"
         
-        self.view.addSubview(contentTextView)
+        self.view.addSubview(todoMemoTextView)
         
-        contentTextView.textColor = .secondaryLabel
-        contentTextView.layer.borderColor = UIColor.gray.cgColor
-        contentTextView.layer.borderWidth = 0.25
-        contentTextView.layer.cornerRadius = 10
-        contentTextView.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        todoMemoTextView.textColor = .secondaryLabel
+        todoMemoTextView.layer.borderColor = UIColor.gray.cgColor
+        todoMemoTextView.layer.borderWidth = 0.25
+        todoMemoTextView.layer.cornerRadius = 10
+        todoMemoTextView.textContainerInset = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         
         NSLayoutConstraint.activate([
-            contentTextView.topAnchor.constraint(equalTo: headTextField.bottomAnchor, constant: 10),
-            contentTextView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            contentTextView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            contentTextView.heightAnchor.constraint(greaterThanOrEqualTo: headTextField.heightAnchor, multiplier: 1.5)
+            todoMemoTextView.topAnchor.constraint(equalTo: todoTitleTextField.bottomAnchor, constant: 10),
+            todoMemoTextView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            todoMemoTextView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            todoMemoTextView.heightAnchor.constraint(greaterThanOrEqualTo: todoTitleTextField.heightAnchor, multiplier: 1.5)
         ])
     }
     
@@ -222,11 +231,11 @@ extension AddingTodoViewController {
         self.view.addSubview(datePicker)
         
         NSLayoutConstraint.activate([
-            datePicker.topAnchor.constraint(equalTo: contentTextView.bottomAnchor),
+            datePicker.topAnchor.constraint(equalTo: todoMemoTextView.bottomAnchor),
             datePicker.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
             datePicker.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
             datePicker.bottomAnchor.constraint(equalTo: buttonsStack.topAnchor),
-            datePicker.heightAnchor.constraint(lessThanOrEqualTo: contentTextView.heightAnchor, multiplier: 0.5)
+            datePicker.heightAnchor.constraint(lessThanOrEqualTo: todoMemoTextView.heightAnchor, multiplier: 0.5)
         ])
         
         guard let todo = viewModel.todoObject else {

@@ -15,6 +15,9 @@ final class AddingTodoViewModel {
     private let coredataManager = CoreDataManager.shared
     
     let todoTitleText: BehaviorSubject<String> = BehaviorSubject(value: "")
+    let todoMemoText: BehaviorSubject<String> = BehaviorSubject(value: "")
+    let todoDate: BehaviorSubject<Date>
+    
     var isWritingCompleted: Observable<Bool> {
         return todoTitleText
             .map { title in
@@ -25,26 +28,15 @@ final class AddingTodoViewModel {
     init(targetDate: Date, todoObject: TodoObject?) {
         self.targetDate = targetDate
         self.todoObject = todoObject
+        self.todoDate = BehaviorSubject(value: targetDate)
     }
     
     func processTodo() -> Bool {
-        if headTextField.text == "" || headTextField.text == nil {
-            showAlert(title: "할 일을 입력해주세요", message: nil)
-            return
+        guard let todoTitle = try? todoTitleText.value() else {
+            return false
         }
         
-        var result = true
-        
-        if todoObject == nil {
-            result = save()
-        } else {
-            result = update()
-        }
-        
-        if result {
-            delegate?.updateTableView(by: datePicker.date)
-            self.dismiss(animated: true)
-        }
+        return todoObject == nil ? save() : update()
     }
     
     private func save() -> Bool {
