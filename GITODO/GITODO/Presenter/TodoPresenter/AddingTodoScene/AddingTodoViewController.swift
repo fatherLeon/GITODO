@@ -6,12 +6,11 @@
 //
 
 import UIKit
+import RxSwift
 
 final class AddingTodoViewController: UIViewController {
     
-    private let targetDate: Date
-    private let todoObject: TodoObject?
-    private let coredataManager = CoreDataManager.shared
+    private let viewModel: AddingTodoViewModel
     private weak var delegate: AddingTodoDelegate?
     
     private let minusView: MinusView = {
@@ -80,8 +79,7 @@ final class AddingTodoViewController: UIViewController {
     }()
     
     init(todoObject: TodoObject? = nil, targetDate: Date = Date(), delegate: AddingTodoDelegate? = nil) {
-        self.todoObject = todoObject
-        self.targetDate = targetDate
+        self.viewModel = AddingTodoViewModel(targetDate: targetDate, todoObject: todoObject)
         self.delegate = delegate
         
         super.init(nibName: nil, bundle: nil)
@@ -98,9 +96,9 @@ final class AddingTodoViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
         self.view.endEditing(false)
+        
+        super.viewWillDisappear(animated)
     }
     
     @objc private func clickedSaveButton() {
@@ -201,7 +199,7 @@ extension AddingTodoViewController {
     }
     
     private func configureHeadTextField() {
-        headTextField.text = todoObject?.title ?? ""
+        headTextField.text = viewModel.todoObject?.title ?? ""
         
         self.view.addSubview(headTextField)
         
@@ -226,7 +224,7 @@ extension AddingTodoViewController {
     
     private func configureContentTextView() {
         contentTextView.delegate = self
-        contentTextView.text = todoObject?.memo ?? "메모를 입력해주세요"
+        contentTextView.text = viewModel.todoObject?.memo ?? "메모를 입력해주세요"
         
         self.view.addSubview(contentTextView)
         
@@ -245,7 +243,7 @@ extension AddingTodoViewController {
     }
     
     private func configureDatePicker() {
-        if todoObject == nil {
+        if viewModel.todoObject == nil {
             datePicker.datePickerMode = .time
         } else {
             datePicker.datePickerMode = .dateAndTime
@@ -261,8 +259,8 @@ extension AddingTodoViewController {
             datePicker.heightAnchor.constraint(lessThanOrEqualTo: contentTextView.heightAnchor, multiplier: 0.5)
         ])
         
-        guard let todo = todoObject else {
-            datePicker.setDate(targetDate, animated: true)
+        guard let todo = viewModel.todoObject else {
+            datePicker.setDate(viewModel.targetDate, animated: true)
             return
         }
         
@@ -274,7 +272,7 @@ extension AddingTodoViewController {
         components.hour = Int(todo.hour)
         components.minute = Int(todo.minute)
         
-        let targetedDate = Calendar.current.date(from: components) ?? targetDate
+        let targetedDate = Calendar.current.date(from: components) ?? viewModel.targetDate
         
         datePicker.setDate(targetedDate, animated: true)
     }
