@@ -9,10 +9,6 @@ import UIKit
 import FSCalendar
 import Lottie
 
-protocol AddingTodoDelegate: AnyObject {
-    func updateTableView(by date: Date)
-}
-
 final class TodoViewController: UIViewController {
     
     private let today = Date()
