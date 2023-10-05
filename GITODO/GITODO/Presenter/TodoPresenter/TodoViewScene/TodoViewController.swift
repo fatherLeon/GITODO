@@ -11,21 +11,8 @@ import Lottie
 
 final class TodoViewController: UIViewController {
     
-    private let today = Date()
-    private var selectedDate = Date()
-    private var currentPage: Date?
-    private var todos: [TodoObject] = []
-    private var repos: [String: Date] = [:] {
-        didSet {
-            DispatchQueue.main.async { [weak self] in
-                self?.calendarView.reloadData()
-            }
-        }
-    }
-    private var maxCommitedNum: Int = 0
-    private let coredataManager = CoreDataManager.shared
-    private let gitManager = GitManager()
-    private let userDefaultManager = UserDefaultManager()
+    private let viewModel = TodoViewModel()
+    
     private var calendarHeightAnchor: NSLayoutConstraint?
     private lazy var gesture: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self.calendarView, action: #selector(calendarView.handleScopeGesture(_:)))
@@ -136,7 +123,7 @@ final class TodoViewController: UIViewController {
         rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
         calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
         
-        updateTableView(by: today)
+        updateTableView(by: viewModel.today)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -147,10 +134,10 @@ final class TodoViewController: UIViewController {
         
         tableView.reloadData()
         
-        if self.repos == repos {
+        if viewModel.repos == repos {
             return
         } else {
-            self.repos = repos
+            viewModel.repos = repos
             updateCommitsInCalendar(repos: repos)
         }
     }
@@ -159,7 +146,7 @@ final class TodoViewController: UIViewController {
         guard let data = coredataManager.fetch(CommitByDateObject.self) as? [CommitByDateObject],
               let maxCommitedNum = data.max(by: { $0.commitedNum < $1.commitedNum })?.commitedNum else { return }
         
-        self.maxCommitedNum = Int(maxCommitedNum)
+        viewModel.maxCommitedNum = Int(maxCommitedNum)
     }
     
     private func updateCommitsInCalendar(repos: [String: Date]) {
@@ -239,13 +226,13 @@ final class TodoViewController: UIViewController {
         
         if calendarView.scope == .week {
             dateComponents.weekOfMonth = 1
-            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+            currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
         } else {
             dateComponents.month = 1
-            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+            currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
         }
         
-        guard let page = currentPage else { return }
+        guard let page = viewModel.currentPage else { return }
         calendarView.setCurrentPage(page, animated: true)
     }
     
@@ -255,24 +242,24 @@ final class TodoViewController: UIViewController {
         
         if calendarView.scope == .week {
             dateComponents.weekOfMonth = -1
-            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+            viewModel.currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
         } else {
             dateComponents.month = -1
-            currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
+            viewModel.currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
         }
         
-        guard let page = currentPage else { return }
+        guard let page = viewModel.currentPage else { return }
         calendarView.setCurrentPage(page, animated: true)
     }
     
     @objc func clickedCalendarBtn() {
-        calendarView.setCurrentPage(today, animated: true)
+        calendarView.setCurrentPage(viewModel.today, animated: true)
     }
     
     @objc func clickedAddButton() {
         addAnimationView.play()
         
-        presentAddingTodoVC(targetDate: selectedDate, delegate: self)
+        presentAddingTodoVC(targetDate: viewModel.selectedDate, delegate: self)
     }
     
     private func deleteTodo(todo: TodoObject) -> Bool {
@@ -313,11 +300,11 @@ extension TodoViewController: AddingTodoDelegate {
     func updateTableView(by date: Date) {
         let todos = fetchTodos(by: date)
         
-        self.todos = todos
+        viewModel.todos = todos
         self.tableView.reloadData()
         self.calendarView.reloadData()
         
-        self.selectedDate = date
+        viewModel.selectedDate = date
         self.calendarView.select(date)
         self.calendarView.setCurrentPage(date, animated: true)
     }
@@ -347,16 +334,16 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let boundaryCellNum = 10
         
-        if todos.count < boundaryCellNum {
+        if viewModel.todos.count < boundaryCellNum {
             return boundaryCellNum
         } else {
-            return todos.count
+            return viewModel.todos.count
         }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoCell.identifier) as? TodoCell,
-              let todo = todos[safe: indexPath.row] else {
+              let todo = viewModel.todos[safe: indexPath.row] else {
             return UITableViewCell()
         }
         
@@ -367,22 +354,22 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let todo = todos[safe: indexPath.row] else {
+        guard let todo = viewModel.todos[safe: indexPath.row] else {
             tableView.deselectRow(at: indexPath, animated: true)
             return
         }
-        presentAddingTodoVC(todoObject: todo, targetDate: selectedDate, delegate: self)
+        presentAddingTodoVC(todoObject: todo, targetDate: viewModel.selectedDate, delegate: self)
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        var todo = todos[indexPath.row]
-        let selectedDate = self.selectedDate
+        var todo = viewModel.todos[indexPath.row]
+        let selectedDate = viewModel.selectedDate
         let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] _, _, completion in
             let result = self?.deleteTodo(todo: todo) ?? true
             
             if result {
-                self?.todos.remove(at: indexPath.row)
+                self?.viewModel.todos.remove(at: indexPath.row)
                 tableView.reloadData()
                 
                 completion(true)
@@ -546,11 +533,6 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
             return FSCalendarCell()
         }
         
-        guard let count = (try? coredataManager.searchOne("\(components.year)-\(components.month)-\(components.day)", type: CommitByDateObject.self) as? CommitByDateObject)?.commitedNum else {
-            cell.updateUI(.systemBackground)
-            return cell
-        }
-        
         guard let firstColor = CustomColor.CommitColorSet[safe: 0] as? UIColor,
               let secondColor = CustomColor.CommitColorSet[safe: 1] as? UIColor,
               let thirdColor = CustomColor.CommitColorSet[safe: 2] as? UIColor else {
@@ -558,12 +540,14 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
             return cell
         }
         
+        let count = viewModel.fetchCommitByDay(year: components.year, month: components.month, day: components.day)
+        
         switch Int(count) {
-        case 0..<Int(Double(maxCommitedNum) * 0.3):
+        case 0..<Int(Double(viewModel.maxCommitedNum) * 0.3):
             cell.updateUI(firstColor)
-        case Int(Double(maxCommitedNum) * 0.3)..<Int(Double(maxCommitedNum) * 0.6):
+        case Int(Double(viewModel.maxCommitedNum) * 0.3)..<Int(Double(viewModel.maxCommitedNum) * 0.6):
             cell.updateUI(secondColor)
-        case Int(Double(maxCommitedNum) * 0.6)...maxCommitedNum:
+        case Int(Double(viewModel.maxCommitedNum) * 0.6)...viewModel.maxCommitedNum:
             cell.updateUI(thirdColor)
         default:
             cell.updateUI(.systemBackground)
@@ -577,13 +561,13 @@ extension TodoViewController: FSCalendarDelegate, FSCalendarDataSource, FSCalend
     }
     
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        self.selectedDate = date
+        viewModel.selectedDate = date
         self.updateTableView(by: date)
     }
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         calendarHeaderLabel.text = Date.toString(calendar.currentPage)
-        currentPage = calendar.currentPage
+        viewModel.currentPage = calendar.currentPage
     }
     
     func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
