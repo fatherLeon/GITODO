@@ -54,7 +54,7 @@ final class AddingTodoViewController: UIViewController {
         
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("SAVE", for: .normal)
-        button.backgroundColor = .systemBlue
+        
         button.setTitleColor(.white, for: .normal)
         
         return button
@@ -148,6 +148,16 @@ final class AddingTodoViewController: UIViewController {
         
         viewModel.isWritingCompleted
             .bind(to: saveButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        viewModel.isWritingCompleted
+            .subscribe { completed in
+                if completed {
+                    self.saveButton.backgroundColor = .systemBlue
+                } else {
+                    self.saveButton.backgroundColor = .systemGray5
+                }
+            }
             .disposed(by: disposeBag)
     }
 }
