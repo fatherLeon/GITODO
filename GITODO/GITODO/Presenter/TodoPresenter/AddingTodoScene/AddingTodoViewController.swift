@@ -115,6 +115,15 @@ final class AddingTodoViewController: UIViewController {
             .bind(to: viewModel.todoMemoText)
             .disposed(by: disposeBag)
         
+        todoMemoTextView.rx.didBeginEditing
+            .subscribe { _ in
+                if self.todoMemoTextView.text == "메모를 입력해주세요" {
+                    self.todoMemoTextView.text = ""
+                    self.todoMemoTextView.textColor = .label
+                }
+            }
+            .disposed(by: disposeBag)
+        
         datePicker.rx.date
             .bind(to: viewModel.todoDate)
             .disposed(by: disposeBag)
@@ -141,16 +150,6 @@ final class AddingTodoViewController: UIViewController {
         viewModel.isWritingCompleted
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
-    }
-}
-
-// MARK: TextViewDelegate
-extension AddingTodoViewController: UITextViewDelegate {
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == "메모를 입력해주세요" {
-            textView.text = ""
-            textView.textColor = .label
-        }
     }
 }
 
@@ -202,7 +201,6 @@ extension AddingTodoViewController {
     }
     
     private func configureContentTextView() {
-        todoMemoTextView.delegate = self
         todoMemoTextView.text = viewModel.todoObject?.memo ?? "메모를 입력해주세요"
         
         self.view.addSubview(todoMemoTextView)

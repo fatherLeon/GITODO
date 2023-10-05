@@ -46,7 +46,6 @@ final class AddingTodoViewModel {
             try coredataManager.save(todo)
             return true
         } catch {
-            showAlert(title: "저장 실패", message: nil)
             return false
         }
     }
@@ -59,13 +58,19 @@ final class AddingTodoViewModel {
             try coredataManager.update(storedDate: storedDate, data: todo, type: TodoObject.self)
             return true
         } catch {
-            showAlert(title: "업데이트 실패", message: nil)
             return false
         }
     }
     
     private func makeTodoObject() -> TodoObject? {
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: datePicker.date)
+        guard let todoTitle = try? todoTitleText.value(),
+              let todoMemo = try? todoMemoText.value(),
+              let todoDate = try? todoDate.value() else {
+            return nil
+        }
+        
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: todoDate
+        )
         guard let year = components.year,
               let month = components.month,
               let day = components.day,
@@ -73,7 +78,7 @@ final class AddingTodoViewModel {
               let minute = components.minute,
               let second = components.second else { return nil }
         
-        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: headTextField.text!, memo: contentTextView.text, storedDate: Date(), isComplete: false)
+        let todo = TodoObject(year: Int16(year), month: Int16(month), day: Int16(day), hour: Int16(hour), minute: Int16(minute), second: Int16(second), title: todoTitle, memo: todoMemo, storedDate: todoDate, isComplete: false)
         
         return todo
     }
