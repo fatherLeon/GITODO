@@ -6,15 +6,18 @@
 //
 
 import UIKit
-import FSCalendar
 import Lottie
+import RxSwift
+import RxCocoa
+import FSCalendar
 
 final class TodoViewController: UIViewController {
     
     private let viewModel = TodoViewModel()
+    private let disposeBag = DisposeBag()
     
     private var calendarHeightAnchor: NSLayoutConstraint?
-    private lazy var gesture: UIPanGestureRecognizer = {
+    private lazy var calendarGesture: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer(target: self.calendarView, action: #selector(calendarView.handleScopeGesture(_:)))
         
         gesture.delegate = self
@@ -97,6 +100,7 @@ final class TodoViewController: UIViewController {
         
         return view
     }()
+    private let addAnimationButton = UIBarButtonItem()
     private let minusView: MinusView = {
         let view = MinusView()
         
@@ -118,10 +122,7 @@ final class TodoViewController: UIViewController {
         
         configureView()
         configureGesture()
-        
-        leftArrowButton.addTarget(self, action: #selector(clickedLeftArrowBtn), for: .touchUpInside)
-        rightArrowButton.addTarget(self, action: #selector(clickedRightArrowBtn), for: .touchUpInside)
-        calendarButton.addTarget(self, action: #selector(clickedCalendarBtn), for: .touchUpInside)
+        binding()
         
         updateTableView(by: viewModel.today)
     }
@@ -140,6 +141,33 @@ final class TodoViewController: UIViewController {
             viewModel.repos = repos
             updateCommitsInCalendar(repos: repos)
         }
+    }
+    
+    private func binding() {
+        leftArrowButton.rx.controlEvent(.touchUpInside)
+            .subscribe { _ in
+                self.viewModel.changeCalendarViewCurrentPage(value: -1, scopeMode: self.calendarView.scope)
+                
+                guard let page = self.viewModel.currentPage else { return }
+                
+                self.calendarView.setCurrentPage(page, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        rightArrowButton.rx.controlEvent(.touchUpInside)
+            .subscribe { _ in
+                self.viewModel.changeCalendarViewCurrentPage(value: 1, scopeMode: self.calendarView.scope)
+                
+                guard let page = self.viewModel.currentPage else { return }
+                self.calendarView.setCurrentPage(page, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        calendarButton.rx.controlEvent(.touchUpInside)
+            .subscribe { _ in
+                self.calendarView.setCurrentPage(self.viewModel.today, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func updateCommitsInCalendar(repos: [String: Date]) {
@@ -184,54 +212,6 @@ final class TodoViewController: UIViewController {
             }
         }
     }
-    
-    @objc func clickedRightArrowBtn() {
-        let calendar = Calendar.current
-        var dateComponents = DateComponents()
-        
-        if calendarView.scope == .week {
-            dateComponents.weekOfMonth = 1
-            viewModel.currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
-        } else {
-            dateComponents.month = 1
-            viewModel.currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
-        }
-        
-        guard let page = viewModel.currentPage else { return }
-        calendarView.setCurrentPage(page, animated: true)
-    }
-    
-    @objc func clickedLeftArrowBtn() {
-        let calendar = Calendar.current
-        var dateComponents = DateComponents()
-        
-        if calendarView.scope == .week {
-            dateComponents.weekOfMonth = -1
-            viewModel.currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
-        } else {
-            dateComponents.month = -1
-            viewModel.currentPage = calendar.date(byAdding: dateComponents, to: viewModel.currentPage ?? viewModel.today)
-        }
-        
-        guard let page = viewModel.currentPage else { return }
-        calendarView.setCurrentPage(page, animated: true)
-    }
-    
-    @objc func clickedCalendarBtn() {
-        calendarView.setCurrentPage(viewModel.today, animated: true)
-    }
-    
-    @objc func clickedAddButton() {
-        addAnimationView.play()
-        
-        presentAddingTodoVC(targetDate: viewModel.selectedDate, delegate: self)
-    }
-    
-    private func presentAddingTodoVC(todoObject: TodoObject? = nil, targetDate: Date, delegate: AddingTodoDelegate? = nil) {
-        let targetVC = AddingTodoViewController(todoObject: todoObject, targetDate: targetDate, delegate: delegate)
-        
-        self.present(targetVC, animated: true)
-    }
 }
 
 // MARK: AddingTodoDelegate
@@ -254,7 +234,7 @@ extension TodoViewController: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         let shouldBegin = self.tableView.contentOffset.y <= -self.tableView.contentInset.top
         if shouldBegin {
-            let velocity = self.gesture.velocity(in: self.view)
+            let velocity = self.calendarGesture.velocity(in: self.view)
             switch self.calendarView.scope {
             case .month:
                 return velocity.y < 0
@@ -297,7 +277,10 @@ extension TodoViewController: UITableViewDelegate, UITableViewDataSource {
             tableView.deselectRow(at: indexPath, animated: true)
             return
         }
-        presentAddingTodoVC(todoObject: todo, targetDate: viewModel.selectedDate, delegate: self)
+        
+        let targetVC = AddingTodoViewController(todoObject: todo, targetDate: viewModel.selectedDate, delegate: self)
+        
+        present(targetVC, animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -368,14 +351,11 @@ extension TodoViewController {
     private func configureNavigationHeaderView() {
         self.navigationItem.title = "GITODO"
         self.addAnimationView.frame.size = CGSize(width: 30, height: 30)
-        self.addAnimationView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(clickedAddButton)))
         
-        let barbutton = UIBarButtonItem(customView: addAnimationView)
+        self.addAnimationButton.customView = addAnimationView
+        self.addAnimationButton.target = self
         
-        barbutton.target = self
-        barbutton.action = #selector(clickedAddButton)
-        
-        self.navigationItem.rightBarButtonItem = barbutton
+        self.navigationItem.setRightBarButton(addAnimationButton, animated: true)
     }
     
     private func configureCalendarHeaderView() {
@@ -452,8 +432,8 @@ extension TodoViewController {
     }
     
     private func configureGesture() {
-        self.view.addGestureRecognizer(gesture)
-        self.tableView.panGestureRecognizer.require(toFail: gesture)
+        self.view.addGestureRecognizer(calendarGesture)
+        self.tableView.panGestureRecognizer.require(toFail: calendarGesture)
     }
     
     private func configureActivityView() {

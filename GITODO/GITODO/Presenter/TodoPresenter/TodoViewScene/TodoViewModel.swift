@@ -5,7 +5,9 @@
 //  Created by 강민수 on 2023/10/05.
 //
 
+import RxSwift
 import Foundation
+import FSCalendar
 
 final class TodoViewModel {
     let today = Date()
@@ -30,6 +32,22 @@ final class TodoViewModel {
         
         targetObejct.commitedNum += 1
         try? updateCommit(targetObejct)
+    }
+    
+    func changeCalendarViewCurrentPage(value: Int, scopeMode: FSCalendarScope) {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        
+        switch scopeMode {
+        case .week:
+            dateComponents.weekOfMonth = value
+        case .month:
+            dateComponents.month = value
+        @unknown default:
+            return
+        }
+        
+        currentPage = calendar.date(byAdding: dateComponents, to: currentPage ?? today)
     }
     
     func fetchCommitByDay(year: Int, month: Int, day: Int) -> CommitByDateObject? {
