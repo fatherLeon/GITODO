@@ -220,7 +220,7 @@ final class TodoViewController: UIViewController {
     @objc private func presentAddingViewController() {
         self.addAnimationView.play()
         
-        self.present(AddingTodoViewController(), animated: true)
+        self.present(AddingTodoViewController(targetDate: viewModel.selectedDate, delegate: self), animated: true)
     }
 }
 
