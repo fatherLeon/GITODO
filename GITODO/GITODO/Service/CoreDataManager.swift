@@ -5,6 +5,7 @@
 //  Created by 강민수 on 2023/08/11.
 //
 
+import RxSwift
 import CoreData
 import Foundation
 
@@ -66,6 +67,18 @@ final class CoreDataManager {
         }
     }
     
+    func fetchByRx(_ type: Interactionable.Type) -> Observable<[Interactionable]> {
+        return Observable.create { [weak self] observer in
+            guard let data = self?.fetch(type) else {
+                return Disposables.create()
+            }
+            
+            observer.onNext(data)
+            
+            return Disposables.create()
+        }
+    }
+    
     func search(_ id: String, type: Interactionable.Type) -> [Interactionable] {
         let request = type.entityType.fetchRequest()
         let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
@@ -83,6 +96,18 @@ final class CoreDataManager {
             }
         } catch {
             return []
+        }
+    }
+    
+    func searchByRx(_ id: String, type: Interactionable.Type) -> Observable<[Interactionable]> {
+        return Observable.create { [weak self] observer in
+            guard let data = self?.search(id, type: type) else {
+                return Disposables.create()
+            }
+            
+            observer.onNext(data)
+            
+            return Disposables.create()
         }
     }
     
@@ -106,6 +131,22 @@ final class CoreDataManager {
         }
     }
     
+    func searchOneByRx(_ id: String, type: Interactionable.Type) -> Observable<Interactionable> {
+        return Observable.create { [weak self] observer in
+            do {
+                guard let data = try self?.searchOne(id, type: type) else {
+                    return Disposables.create()
+                }
+                
+                observer.onNext(data)
+            } catch {
+                observer.onError(error)
+            }
+            
+            return Disposables.create()
+        }
+    }
+    
     func search(_ storedDate: Date, type: Interactionable.Type) throws -> NSManagedObject {
         let request = type.entityType.fetchRequest()
         let entity = NSEntityDescription.entity(forEntityName: type.entityName, in: context)
@@ -121,6 +162,22 @@ final class CoreDataManager {
             return result
         } catch {
             throw DBError.fetchError
+        }
+    }
+    
+    func searchByRx(_ storedDate: Date, type: Interactionable.Type) -> Observable<NSManagedObject> {
+        return Observable.create { [weak self] observer in
+            do {
+                guard let data = try self?.search(storedDate, type: type) else {
+                    return Disposables.create()
+                }
+                
+                observer.onNext(data)
+            } catch {
+                observer.onError(error)
+            }
+            
+            return Disposables.create()
         }
     }
     
