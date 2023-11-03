@@ -145,27 +145,31 @@ final class TodoViewController: UIViewController {
     
     private func binding() {
         leftArrowButton.rx.controlEvent(.touchUpInside)
-            .subscribe { _ in
-                self.viewModel.changeCalendarViewCurrentPage(value: -1, scopeMode: self.calendarView.scope)
+            .subscribe { [weak self] _ in
+                guard let scopeMode = self?.calendarView.scope else { return }
                 
-                guard let page = self.viewModel.currentPage else { return }
+                self?.viewModel.changeCalendarViewCurrentPage(value: -1, scopeMode: scopeMode)
                 
-                self.calendarView.setCurrentPage(page, animated: true)
+                guard let page = self?.viewModel.currentPage else { return }
+                
+                self?.calendarView.setCurrentPage(page, animated: true)
             }
             .disposed(by: disposeBag)
         
         rightArrowButton.rx.controlEvent(.touchUpInside)
-            .subscribe { _ in
-                self.viewModel.changeCalendarViewCurrentPage(value: 1, scopeMode: self.calendarView.scope)
+            .subscribe { [weak self] _ in
+                guard let scopeMode = self?.calendarView.scope else { return }
                 
-                guard let page = self.viewModel.currentPage else { return }
-                self.calendarView.setCurrentPage(page, animated: true)
+                self?.viewModel.changeCalendarViewCurrentPage(value: 1, scopeMode: scopeMode)
+                
+                guard let page = self?.viewModel.currentPage else { return }
+                self?.calendarView.setCurrentPage(page, animated: true)
             }
             .disposed(by: disposeBag)
         
         calendarButton.rx.controlEvent(.touchUpInside)
-            .subscribe { _ in
-                self.calendarView.setCurrentPage(self.viewModel.today, animated: true)
+            .subscribe { [weak self] _ in
+                self?.calendarView.setCurrentPage(Date(), animated: true)
             }
             .disposed(by: disposeBag)
     }
