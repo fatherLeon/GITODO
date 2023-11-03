@@ -216,6 +216,12 @@ final class TodoViewController: UIViewController {
             }
         }
     }
+    
+    @objc private func presentAddingViewController() {
+        self.addAnimationView.play()
+        
+        self.present(AddingTodoViewController(), animated: true)
+    }
 }
 
 // MARK: AddingTodoDelegate
@@ -355,6 +361,7 @@ extension TodoViewController {
     private func configureNavigationHeaderView() {
         self.navigationItem.title = "GITODO"
         self.addAnimationView.frame.size = CGSize(width: 30, height: 30)
+        self.addAnimationView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(presentAddingViewController)))
         
         self.addAnimationButton.customView = addAnimationView
         self.addAnimationButton.target = self
