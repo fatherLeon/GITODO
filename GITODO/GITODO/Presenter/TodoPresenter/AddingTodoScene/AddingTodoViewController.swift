@@ -115,10 +115,10 @@ final class AddingTodoViewController: UIViewController {
             .disposed(by: disposeBag)
         
         todoMemoTextView.rx.didBeginEditing
-            .subscribe { _ in
-                if self.todoMemoTextView.text == "메모를 입력해주세요" {
-                    self.todoMemoTextView.text = ""
-                    self.todoMemoTextView.textColor = .label
+            .subscribe { [weak self] _ in
+                if self?.todoMemoTextView.text == "메모를 입력해주세요" {
+                    self?.todoMemoTextView.text = ""
+                    self?.todoMemoTextView.textColor = .label
                 }
             }
             .disposed(by: disposeBag)
@@ -128,19 +128,21 @@ final class AddingTodoViewController: UIViewController {
             .disposed(by: disposeBag)
         
         saveButton.rx.tap
-            .subscribe { _ in
-                if self.viewModel.processTodo() {
-                    self.delegate?.updateTableView(by: self.datePicker.date)
-                    self.dismiss(animated: true)
+            .subscribe { [weak self] _ in
+                if self?.viewModel.processTodo() == true {
+                    guard let pickerDate = self?.datePicker.date else { return }
+                    
+                    self?.delegate?.updateTableView(by: pickerDate)
+                    self?.dismiss(animated: true)
                 } else {
-                    self.showAlert(title: "저장에 실패하였습니다.", message: nil)
+                    self?.showAlert(title: "저장에 실패하였습니다.", message: nil)
                 }
             }
             .disposed(by: disposeBag)
         
         cancelButton.rx.tap
-            .subscribe { _ in
-                self.dismiss(animated: true)
+            .subscribe { [weak self] _ in
+                self?.dismiss(animated: true)
             }
             .disposed(by: disposeBag)
         
@@ -149,11 +151,11 @@ final class AddingTodoViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.isWritingCompleted
-            .subscribe { completed in
+            .subscribe { [weak self] completed in
                 if completed {
-                    self.saveButton.backgroundColor = .systemBlue
+                    self?.saveButton.backgroundColor = .systemBlue
                 } else {
-                    self.saveButton.backgroundColor = .systemGray5
+                    self?.saveButton.backgroundColor = .systemGray5
                 }
             }
             .disposed(by: disposeBag)
