@@ -5,6 +5,7 @@
 //  Created by 강민수 on 2023/08/22.
 //
 
+import RxSwift
 import Foundation
 
 final class NetworkProvider {
@@ -36,6 +37,25 @@ final class NetworkProvider {
             }.resume()
         } catch let error {
             completion(.failure(error))
+        }
+    }
+    
+    func requestByRx<R: Requestable>(by type: Decodable.Type, with endPoint: R) -> Observable<Decodable> {
+        return Observable.create { [weak self] observer in
+            do {
+                try self?.request(by: type, with: endPoint) { result in
+                    switch result {
+                    case .success(let data):
+                        observer.onNext(data)
+                    case .failure(let error):
+                        observer.onError(error)
+                    }
+                }
+            } catch {
+                observer.onError(error)
+            }
+            
+            return Disposables.create()
         }
     }
     
