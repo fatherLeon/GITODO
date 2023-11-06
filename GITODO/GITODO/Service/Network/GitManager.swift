@@ -36,7 +36,7 @@ final class GitManager {
     func searchReposByRx(by nickname: String, perPage: Int, page: Int) -> Observable<GitRepositories> {
         let requestable = EndPoint.repository(user: nickname, perPage: perPage, page: page)
         
-        return network.requestByRx(by: GitRepository.self, with: requestable)
+        return network.requestByRx(by: GitRepositories.self, with: requestable)
             .asObservable()
             .map { decodable in
                 guard let decodingData = decodable as? GitRepositories else {
@@ -63,5 +63,19 @@ final class GitManager {
                 completion([])
             }
         })
+    }
+    
+    func searchCommits(by fullName: String, perPage: Int = 30, page: Int = 1, since: Date, until: Date) -> Observable<GitCommits> {
+        let requestable = EndPoint.commits(fullName: fullName, perPage: perPage, page: page, since: since, until: until)
+        
+        return network.requestByRx(by: GitCommits.self, with: requestable)
+            .asObservable()
+            .map { decodable in
+                guard let decodingData = decodable as? GitCommits else {
+                    return GitCommits()
+                }
+                
+                return decodingData
+            }
     }
 }
