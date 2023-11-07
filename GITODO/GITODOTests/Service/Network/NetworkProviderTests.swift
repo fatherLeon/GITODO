@@ -11,27 +11,57 @@ import XCTest
 
 final class NetworkProviderTests: XCTestCase {
 
+    var networkProvider: NetworkProvider!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MockURLProtocol.self]
+        let urlSession = URLSession(configuration: configuration)
+        
+        networkProvider = NetworkProvider(session: urlSession)
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        networkProvider = nil
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    // MARK: request - escaping closure
+    func test_올바른_데이터_입력시_Data확인() {
+        // given
+        let fakeRequestable = FakeRequestable()
+        let repositoryCount = 3 
+        var isSuccess = false
+        let expectation = XCTestExpectation(description: "test_올바른_데이터_입력시_Data확인")
+        
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
         }
+        
+        // when
+        try! networkProvider.request(by: GitRepositories.self, with: fakeRequestable) { result in
+            switch result {
+            case .success(let data):
+                guard let data = data as? GitRepositories else {
+                    XCTFail("test_올바른_데이터_입력시_Data확인 - JsonDecoding 파싱 문제")
+                    return
+                }
+                
+                isSuccess = true
+                print(data.count)
+                XCTAssertEqual(repositoryCount, data.count)
+                expectation.fulfill()
+            case .failure(_):
+                XCTFail("test_올바른_데이터_입력시_Data확인 - 성공해야만 하는 테스트케이스")
+            }
+        }
+        
+        // then
+        wait(for: [expectation])
+        XCTAssertTrue(isSuccess)
     }
 
+    // MARK: requestByRx
 }
