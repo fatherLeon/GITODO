@@ -65,7 +65,7 @@ final class GitManager {
         })
     }
     
-    func searchCommits(by fullName: String, perPage: Int = 30, page: Int = 1, since: Date, until: Date) -> Observable<GitCommits> {
+    func searchCommitsByRx(by fullName: String, perPage: Int = 30, page: Int = 1, since: Date, until: Date) -> Observable<GitCommits> {
         let requestable = EndPoint.commits(fullName: fullName, perPage: perPage, page: page, since: since, until: until)
         
         return network.requestByRx(by: GitCommits.self, with: requestable)
