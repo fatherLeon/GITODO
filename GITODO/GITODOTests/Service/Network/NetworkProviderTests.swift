@@ -8,6 +8,9 @@
 @testable
 import GITODO
 import XCTest
+import RxSwift
+import RxTest
+import RxBlocking
 
 final class NetworkProviderTests: XCTestCase {
 
@@ -50,7 +53,6 @@ final class NetworkProviderTests: XCTestCase {
                 }
                 
                 isSuccess = true
-                print(data.count)
                 XCTAssertEqual(expectationRepositoryCount, data.count)
                 expectation.fulfill()
             case .failure(_):
@@ -131,4 +133,37 @@ final class NetworkProviderTests: XCTestCase {
     }
 
     // MARK: requestByRx
+    func test_올바른_데이터_입력시_Data방출확인() {
+        // given
+        let fakeRequestable = FakeRequestable()
+        let expectationRepositoryCount = 3
+        let expectationFirstFullName = "fatherLeon/baekjoon"
+        let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        
+        // when
+        let observable = networkProvider.requestByRx(by: GitRepositories.self, with: fakeRequestable)
+            .map({ decodable in
+                return decodable as! GitRepositories
+            })
+            .subscribe(on: scheduler)
+        
+        // then
+        do {
+            let result = try observable.toBlocking().single()
+            let resultRepositoryCount = result.count
+            let resultFirstFullName = result.first!.fullName
+            
+            XCTAssertEqual(expectationRepositoryCount, resultRepositoryCount)
+            XCTAssertEqual(expectationFirstFullName, resultFirstFullName)
+        } catch {
+            XCTFail("test_올바른_데이터_입력시_Data방출확인 - 성공해야하만 하는 테스트케이스")
+        }
+    }
 }

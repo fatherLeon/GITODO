@@ -47,6 +47,7 @@ final class NetworkProvider {
                     switch result {
                     case .success(let data):
                         observer.onNext(data)
+                        observer.onCompleted()
                     case .failure(let error):
                         observer.onError(error)
                     }
