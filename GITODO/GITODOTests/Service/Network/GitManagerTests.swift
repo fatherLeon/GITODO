@@ -5,33 +5,53 @@
 //  Created by 강민수 on 11/28/23.
 //
 
+@testable
+import GITODO
 import XCTest
 
 final class GitManagerTests: XCTestCase {
     
+    private var gitManager: GitManager!
     
+    private let repoInfos = (nickname: "abc", perPage: 100, page: 1)
+    private let commitInfos = (fullName: "repo", since: Date(), until: Date())
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MockURLProtocol.self]
+        let urlSession = URLSession(configuration: configuration)
+        
+        gitManager = GitManager(session: urlSession)
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        gitManager = nil
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    // MARK: Tests - escaping closure
+    func test_올바른Repository를_반환하는지_확인() {
+        // given
+        let expectationReposCount = 3
+        let expectation = XCTestExpectation()
+        var isSuccess = false
+        
+        MockURLProtocol.requestHandler = { request in
+            let fakeRequestable = FakeRequestable()
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
         }
+        
+        // when
+        gitManager.searchRepos(by: repoInfos.nickname, perPage: repoInfos.perPage, page: repoInfos.page) { repo in
+            XCTAssertEqual(expectationReposCount, repo.count)
+            isSuccess = true
+            expectation.fulfill()
+        }
+        
+        // then
+        wait(for: [expectation])
+        XCTAssertTrue(isSuccess)
     }
-
 }

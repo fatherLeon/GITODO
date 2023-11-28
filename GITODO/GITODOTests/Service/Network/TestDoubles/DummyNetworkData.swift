@@ -8,6 +8,247 @@
 import Foundation
 
 enum DummyNetworkData {
+    static let commitData = """
+    [
+        {
+            "sha": "8b699950b2a65fa6b59b2ad33d4885c42471f6e7",
+            "node_id": "C_kwDOKopuk9oAKDhiNjk5OTUwYjJhNjVmYTZiNTliMmFkMzNkNDg4NWM0MjQ3MWY2ZTc",
+            "commit": {
+                "author": {
+                    "name": "강민수",
+                    "email": "55453151+fatherLeon@users.noreply.github.com",
+                    "date": "2023-11-28T04:20:07Z"
+                },
+                "committer": {
+                    "name": "강민수",
+                    "email": "55453151+fatherLeon@users.noreply.github.com",
+                    "date": "2023-11-28T04:20:07Z"
+                },
+                "message": "[Gold IV] Title: 구슬 찾기, Time: 28 ms, Memory: 79652 KB -BaekjoonHub",
+                "tree": {
+                    "sha": "ad208391ae7cf21784908f4fee1977c1bef002ed",
+                    "url": "https://api.github.com/repos/fatherLeon/CodingTest/git/trees/ad208391ae7cf21784908f4fee1977c1bef002ed"
+                },
+                "url": "https://api.github.com/repos/fatherLeon/CodingTest/git/commits/8b699950b2a65fa6b59b2ad33d4885c42471f6e7",
+                "comment_count": 0,
+                "verification": {
+                    "verified": false,
+                    "reason": "unsigned",
+                    "signature": null,
+                    "payload": null
+                }
+            },
+            "url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/8b699950b2a65fa6b59b2ad33d4885c42471f6e7",
+            "html_url": "https://github.com/fatherLeon/CodingTest/commit/8b699950b2a65fa6b59b2ad33d4885c42471f6e7",
+            "comments_url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/8b699950b2a65fa6b59b2ad33d4885c42471f6e7/comments",
+            "author": {
+                "login": "fatherLeon",
+                "id": 55453151,
+                "node_id": "MDQ6VXNlcjU1NDUzMTUx",
+                "avatar_url": "https://avatars.githubusercontent.com/u/55453151?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/fatherLeon",
+                "html_url": "https://github.com/fatherLeon",
+                "followers_url": "https://api.github.com/users/fatherLeon/followers",
+                "following_url": "https://api.github.com/users/fatherLeon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/fatherLeon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/fatherLeon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/fatherLeon/subscriptions",
+                "organizations_url": "https://api.github.com/users/fatherLeon/orgs",
+                "repos_url": "https://api.github.com/users/fatherLeon/repos",
+                "events_url": "https://api.github.com/users/fatherLeon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/fatherLeon/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "committer": {
+                "login": "fatherLeon",
+                "id": 55453151,
+                "node_id": "MDQ6VXNlcjU1NDUzMTUx",
+                "avatar_url": "https://avatars.githubusercontent.com/u/55453151?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/fatherLeon",
+                "html_url": "https://github.com/fatherLeon",
+                "followers_url": "https://api.github.com/users/fatherLeon/followers",
+                "following_url": "https://api.github.com/users/fatherLeon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/fatherLeon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/fatherLeon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/fatherLeon/subscriptions",
+                "organizations_url": "https://api.github.com/users/fatherLeon/orgs",
+                "repos_url": "https://api.github.com/users/fatherLeon/repos",
+                "events_url": "https://api.github.com/users/fatherLeon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/fatherLeon/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "parents": [
+                {
+                    "sha": "a518b067bfc531749d860e39269777c4644a1d58",
+                    "url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/a518b067bfc531749d860e39269777c4644a1d58",
+                    "html_url": "https://github.com/fatherLeon/CodingTest/commit/a518b067bfc531749d860e39269777c4644a1d58"
+                }
+            ]
+        },
+        {
+            "sha": "bd29715d19d6568f232170ed600286025000a1bd",
+            "node_id": "C_kwDOKopuk9oAKGJkMjk3MTVkMTlkNjU2OGYyMzIxNzBlZDYwMDI4NjAyNTAwMGExYmQ",
+            "commit": {
+                "author": {
+                    "name": "강민수",
+                    "email": "55453151+fatherLeon@users.noreply.github.com",
+                    "date": "2023-11-14T04:54:10Z"
+                },
+                "committer": {
+                    "name": "강민수",
+                    "email": "55453151+fatherLeon@users.noreply.github.com",
+                    "date": "2023-11-14T04:54:10Z"
+                },
+                "message": "[Silver I] Title: 숨바꼭질, Time: 76 ms, Memory: 84256 KB -BaekjoonHub",
+                "tree": {
+                    "sha": "5fcba680d456e9d45e5bbee3b6c99ce80d98bc97",
+                    "url": "https://api.github.com/repos/fatherLeon/CodingTest/git/trees/5fcba680d456e9d45e5bbee3b6c99ce80d98bc97"
+                },
+                "url": "https://api.github.com/repos/fatherLeon/CodingTest/git/commits/bd29715d19d6568f232170ed600286025000a1bd",
+                "comment_count": 0,
+                "verification": {
+                    "verified": false,
+                    "reason": "unsigned",
+                    "signature": null,
+                    "payload": null
+                }
+            },
+            "url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/bd29715d19d6568f232170ed600286025000a1bd",
+            "html_url": "https://github.com/fatherLeon/CodingTest/commit/bd29715d19d6568f232170ed600286025000a1bd",
+            "comments_url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/bd29715d19d6568f232170ed600286025000a1bd/comments",
+            "author": {
+                "login": "fatherLeon",
+                "id": 55453151,
+                "node_id": "MDQ6VXNlcjU1NDUzMTUx",
+                "avatar_url": "https://avatars.githubusercontent.com/u/55453151?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/fatherLeon",
+                "html_url": "https://github.com/fatherLeon",
+                "followers_url": "https://api.github.com/users/fatherLeon/followers",
+                "following_url": "https://api.github.com/users/fatherLeon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/fatherLeon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/fatherLeon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/fatherLeon/subscriptions",
+                "organizations_url": "https://api.github.com/users/fatherLeon/orgs",
+                "repos_url": "https://api.github.com/users/fatherLeon/repos",
+                "events_url": "https://api.github.com/users/fatherLeon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/fatherLeon/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "committer": {
+                "login": "fatherLeon",
+                "id": 55453151,
+                "node_id": "MDQ6VXNlcjU1NDUzMTUx",
+                "avatar_url": "https://avatars.githubusercontent.com/u/55453151?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/fatherLeon",
+                "html_url": "https://github.com/fatherLeon",
+                "followers_url": "https://api.github.com/users/fatherLeon/followers",
+                "following_url": "https://api.github.com/users/fatherLeon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/fatherLeon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/fatherLeon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/fatherLeon/subscriptions",
+                "organizations_url": "https://api.github.com/users/fatherLeon/orgs",
+                "repos_url": "https://api.github.com/users/fatherLeon/repos",
+                "events_url": "https://api.github.com/users/fatherLeon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/fatherLeon/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "parents": [
+                {
+                    "sha": "b7fccbcdbb15de81ef7f4d7c2045214019db59ce",
+                    "url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/b7fccbcdbb15de81ef7f4d7c2045214019db59ce",
+                    "html_url": "https://github.com/fatherLeon/CodingTest/commit/b7fccbcdbb15de81ef7f4d7c2045214019db59ce"
+                }
+            ]
+        },
+        {
+            "sha": "6c8cd3abf99a8f0db591c6e939095aec8da22bf9",
+            "node_id": "C_kwDOKopuk9oAKDZjOGNkM2FiZjk5YThmMGRiNTkxYzZlOTM5MDk1YWVjOGRhMjJiZjk",
+            "commit": {
+                "author": {
+                    "name": "강민수",
+                    "email": "55453151+fatherLeon@users.noreply.github.com",
+                    "date": "2023-11-06T06:22:37Z"
+                },
+                "committer": {
+                    "name": "강민수",
+                    "email": "55453151+fatherLeon@users.noreply.github.com",
+                    "date": "2023-11-06T06:22:37Z"
+                },
+                "message": "[Silver II] Title: 최대 힙, Time: 124 ms, Memory: 81084 KB -BaekjoonHub",
+                "tree": {
+                    "sha": "1ad7157adb016006eeefb0de3323d401a902dc70",
+                    "url": "https://api.github.com/repos/fatherLeon/CodingTest/git/trees/1ad7157adb016006eeefb0de3323d401a902dc70"
+                },
+                "url": "https://api.github.com/repos/fatherLeon/CodingTest/git/commits/6c8cd3abf99a8f0db591c6e939095aec8da22bf9",
+                "comment_count": 0,
+                "verification": {
+                    "verified": false,
+                    "reason": "unsigned",
+                    "signature": null,
+                    "payload": null
+                }
+            },
+            "url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/6c8cd3abf99a8f0db591c6e939095aec8da22bf9",
+            "html_url": "https://github.com/fatherLeon/CodingTest/commit/6c8cd3abf99a8f0db591c6e939095aec8da22bf9",
+            "comments_url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/6c8cd3abf99a8f0db591c6e939095aec8da22bf9/comments",
+            "author": {
+                "login": "fatherLeon",
+                "id": 55453151,
+                "node_id": "MDQ6VXNlcjU1NDUzMTUx",
+                "avatar_url": "https://avatars.githubusercontent.com/u/55453151?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/fatherLeon",
+                "html_url": "https://github.com/fatherLeon",
+                "followers_url": "https://api.github.com/users/fatherLeon/followers",
+                "following_url": "https://api.github.com/users/fatherLeon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/fatherLeon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/fatherLeon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/fatherLeon/subscriptions",
+                "organizations_url": "https://api.github.com/users/fatherLeon/orgs",
+                "repos_url": "https://api.github.com/users/fatherLeon/repos",
+                "events_url": "https://api.github.com/users/fatherLeon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/fatherLeon/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "committer": {
+                "login": "fatherLeon",
+                "id": 55453151,
+                "node_id": "MDQ6VXNlcjU1NDUzMTUx",
+                "avatar_url": "https://avatars.githubusercontent.com/u/55453151?v=4",
+                "gravatar_id": "",
+                "url": "https://api.github.com/users/fatherLeon",
+                "html_url": "https://github.com/fatherLeon",
+                "followers_url": "https://api.github.com/users/fatherLeon/followers",
+                "following_url": "https://api.github.com/users/fatherLeon/following{/other_user}",
+                "gists_url": "https://api.github.com/users/fatherLeon/gists{/gist_id}",
+                "starred_url": "https://api.github.com/users/fatherLeon/starred{/owner}{/repo}",
+                "subscriptions_url": "https://api.github.com/users/fatherLeon/subscriptions",
+                "organizations_url": "https://api.github.com/users/fatherLeon/orgs",
+                "repos_url": "https://api.github.com/users/fatherLeon/repos",
+                "events_url": "https://api.github.com/users/fatherLeon/events{/privacy}",
+                "received_events_url": "https://api.github.com/users/fatherLeon/received_events",
+                "type": "User",
+                "site_admin": false
+            },
+            "parents": [
+                {
+                    "sha": "eaa20379557a98efb27c3142932f89223cf7ecfb",
+                    "url": "https://api.github.com/repos/fatherLeon/CodingTest/commits/eaa20379557a98efb27c3142932f89223cf7ecfb",
+                    "html_url": "https://github.com/fatherLeon/CodingTest/commit/eaa20379557a98efb27c3142932f89223cf7ecfb"
+                }
+            ]
+        }
+    ]
+    """
     static let repositoryData = """
     [
         {
