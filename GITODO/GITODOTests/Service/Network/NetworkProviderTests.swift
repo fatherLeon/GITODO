@@ -192,4 +192,30 @@ final class NetworkProviderTests: XCTestCase {
             XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
         }
     }
+    
+    func test_잘못된_URLResponse응답일경우_ResponseError가_표시됨_ByRx() {
+        // given
+        let fakeRequestable = FakeRequestable()
+        let expectationError = NetworkError.invalidResponseError(statusCode: 403)
+        let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 403, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        
+        // when
+        let observable = networkProvider.requestByRx(by: GitRepositories.self, with: fakeRequestable)
+            .subscribe(on: scheduler)
+        
+        // then
+        do {
+            _ = try observable.toBlocking().single()
+            XCTFail("test_잘못된_URLResponse응답일경우_ResponseError가_표시됨_ByRx")
+        } catch {
+            XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
+        }
+    }
 }
