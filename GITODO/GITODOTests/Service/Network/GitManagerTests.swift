@@ -54,4 +54,30 @@ final class GitManagerTests: XCTestCase {
         wait(for: [expectation])
         XCTAssertTrue(isSuccess)
     }
+    
+    func test_올바른Commit들을_반환하는지_확인() {
+        // given
+        let expectationCommitCount = 3
+        let expectation = XCTestExpectation()
+        var isSuccess = false
+        
+        MockURLProtocol.requestHandler = { request in
+            let fakeRequestable = FakeRequestable()
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.commitData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        
+        // when
+        gitManager.searchCommits(by: commitInfos.fullName, since: commitInfos.since, until: commitInfos.until) { commits in
+            XCTAssertEqual(expectationCommitCount, commits.count)
+            isSuccess = true
+            expectation.fulfill()
+        }
+        
+        // then
+        wait(for: [expectation])
+        XCTAssertTrue(isSuccess)
+    }
 }
