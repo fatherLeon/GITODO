@@ -8,6 +8,9 @@
 @testable
 import GITODO
 import XCTest
+import RxTest
+import RxSwift
+import RxBlocking
 
 final class GitManagerTests: XCTestCase {
     
@@ -79,5 +82,37 @@ final class GitManagerTests: XCTestCase {
         // then
         wait(for: [expectation])
         XCTAssertTrue(isSuccess)
+    }
+    
+    //MARK: Tests - Rx
+    func test_올바른Repository를_반환하는지_확인_ByRx() {
+        // given
+        let expectationRepositoryCount = 3
+        let expectationFirstFullName = "fatherLeon/baekjoon"
+        let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        
+        MockURLProtocol.requestHandler = { request in
+            let fakeRequestable = FakeRequestable()
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        
+        // when
+        let observable = gitManager.searchReposByRx(by: repoInfos.nickname, perPage: repoInfos.perPage, page: repoInfos.page)
+            .subscribe(on: scheduler)
+        
+        // then
+        do {
+            let result = try observable.toBlocking().single()
+            let resultRepositoryCount = result.count
+            let resultFirstFullName = result.first!.fullName
+            
+            XCTAssertEqual(expectationRepositoryCount, resultRepositoryCount)
+            XCTAssertEqual(expectationFirstFullName, resultFirstFullName)
+        } catch {
+            XCTFail("test_올바른Repository를_반환하는지_확인_ByRx")
+        }
     }
 }
