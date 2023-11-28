@@ -133,7 +133,7 @@ final class NetworkProviderTests: XCTestCase {
     }
 
     // MARK: requestByRx
-    func test_올바른_데이터_입력시_Data방출확인() {
+    func test_올바른_데이터_입력시_Data방출확인_ByRx() {
         // given
         let fakeRequestable = FakeRequestable()
         let expectationRepositoryCount = 3
@@ -164,6 +164,32 @@ final class NetworkProviderTests: XCTestCase {
             XCTAssertEqual(expectationFirstFullName, resultFirstFullName)
         } catch {
             XCTFail("test_올바른_데이터_입력시_Data방출확인 - 성공해야하만 하는 테스트케이스")
+        }
+    }
+    
+    func test_Decodable_Type_입력이_잘못될경우_DecodingError가_표시됨_ByRx() {
+        // given
+        let fakeRequestable = FakeRequestable()
+        let expectationError = NetworkError.jsonDecodingError
+        let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        
+        // when
+        let observable = networkProvider.requestByRx(by: GitCommits.self, with: fakeRequestable)
+            .subscribe(on: scheduler)
+        
+        // then
+        do {
+            _ = try observable.toBlocking().single()
+            XCTFail("test_Decodable_Type_입력이_잘못될경우_DecodingError가_표시됨_ByRx - 실패해야하는 테스트케이스")
+        } catch {
+            XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
         }
     }
 }
