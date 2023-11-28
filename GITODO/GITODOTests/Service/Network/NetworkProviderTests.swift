@@ -14,7 +14,7 @@ import RxBlocking
 
 final class NetworkProviderTests: XCTestCase {
 
-    var networkProvider: NetworkProvider!
+    private var networkProvider: NetworkProvider!
     
     override func setUpWithError() throws {
         let configuration = URLSessionConfiguration.ephemeral
