@@ -74,6 +74,7 @@ final class CoreDataManager {
             }
             
             observer.onNext(data)
+            observer.onCompleted()
             
             return Disposables.create()
         }
@@ -106,6 +107,7 @@ final class CoreDataManager {
             }
             
             observer.onNext(data)
+            observer.onCompleted()
             
             return Disposables.create()
         }
@@ -137,8 +139,8 @@ final class CoreDataManager {
                 guard let data = try self?.searchOne(id, type: type) else {
                     return Disposables.create()
                 }
-                
                 observer.onNext(data)
+                observer.onCompleted()
             } catch {
                 observer.onError(error)
             }
@@ -171,8 +173,8 @@ final class CoreDataManager {
                 guard let data = try self?.search(storedDate, type: type) else {
                     return Disposables.create()
                 }
-                
                 observer.onNext(data)
+                observer.onCompleted()
             } catch {
                 observer.onError(error)
             }
