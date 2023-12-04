@@ -116,7 +116,7 @@ final class GitManagerTests: XCTestCase {
         }
     }
     
-    func test_네트워크_데이터가_올바르게_들어오지_못할경우_error를_반환() {
+    func test_네트워크_응답이_올바르지_못할경우_error를_반환() {
         // given
         let expectationError = NetworkError.invalidResponseError(statusCode: 403)
         let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
@@ -135,8 +135,8 @@ final class GitManagerTests: XCTestCase {
         
         // then
         do {
-            let result = try observable.toBlocking().single()
-            XCTFail("test_네트워크_데이터가_올바르게_들어오지_못할경우_error를_반환")
+            _ = try observable.toBlocking().single()
+            XCTFail("test_네트워크_응답이_올바르지_못할경우_error를_반환")
         } catch {
             XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
         }
@@ -161,7 +161,7 @@ final class GitManagerTests: XCTestCase {
         
         // then
         do {
-            let result = try observable.toBlocking().single()
+            _ = try observable.toBlocking().single()
             XCTFail("test_기존과_다른_데이터가_들어올경우_DecodingError반환")
         } catch {
             XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
@@ -199,5 +199,54 @@ final class GitManagerTests: XCTestCase {
         
         XCTAssertTrue(isSuccess)
     }
-
+    
+    func test_searchCommitsByRx메서드_실행시_올바르지_않은_네트워크_응답이_올_경우_Error를_반환() {
+        // given
+        let expectationError = NetworkError.invalidResponseError(statusCode: 403)
+        let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        
+        MockURLProtocol.requestHandler = { request in
+            let fakeRequestable = FakeRequestable()
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 403, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.commitData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        // when
+        let observable = gitManager.searchCommitsByRx(by: commitInfos.fullName, since: commitInfos.since, until: commitInfos.until)
+            .subscribe(on: scheduler)
+        
+        // then
+        do {
+            _ = try observable.toBlocking().single()
+            XCTFail("test_searchCommitsByRx메서드_실행시_올바르지_않은_네트워크_응답이_올_경우_Error를_반환")
+        } catch {
+            XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
+        }
+    }
+    
+    func test_searchCommitsByRx메서드_실행시_다른_타입의_Json을_받을경우_Error를_반환() {
+        // given
+        let expectationError = NetworkError.jsonDecodingError
+        let scheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        
+        MockURLProtocol.requestHandler = { request in
+            let fakeRequestable = FakeRequestable()
+            let response = HTTPURLResponse(url: fakeRequestable.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            let data = DummyNetworkData.repositoryData.data(using: .utf8)!
+            
+            return (response, data)
+        }
+        // when
+        let observable = gitManager.searchCommitsByRx(by: commitInfos.fullName, since: commitInfos.since, until: commitInfos.until)
+            .subscribe(on: scheduler)
+        
+        // then
+        do {
+            _ = try observable.toBlocking().single()
+            XCTFail("est_searchCommitsByRx메서드_실행시_다른_타입의_Json을_받을경우_Error를_반환")
+        } catch {
+            XCTAssertEqual(expectationError.localizedDescription, error.localizedDescription)
+        }
+    }
 }
